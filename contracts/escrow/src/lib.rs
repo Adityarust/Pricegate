@@ -1,132 +1,80 @@
 #![no_std]
 
-/// PriceGate Escrow Contract
+//! PriceGate Escrow — locks XLM and releases when a price condition is met.
+//! Uses the oracle contract for live price checks via cross-contract calls.
 
+mod oracle;
 
+use oracle::OracleContractClient;
 use soroban_sdk::{
     contract, contracterror, contractimpl, contracttype, log, token, Address, Env, Symbol,
 };
 
-// ---------------------------------------------------------------------------
-// Constants
-// ---------------------------------------------------------------------------
-
-/// TTL bump for instance storage (~30 days at 5s/ledger).
-const INSTANCE_BUMP_AMOUNT: u32 = 518_400;
-
-/// TTL threshold to trigger instance bump (~7 days).
-const INSTANCE_LIFETIME_THRESHOLD: u32 = 120_960;
-
-/// TTL bump for persistent storage (gate configs) (~60 days).
-const PERSISTENT_BUMP_AMOUNT: u32 = 1_036_800;
-
-/// TTL threshold to trigger persistent bump (~14 days).
-const PERSISTENT_LIFETIME_THRESHOLD: u32 = 241_920;
-
-// ---------------------------------------------------------------------------
-// Storage keys
-// ---------------------------------------------------------------------------
+const INSTANCE_BUMP_AMOUNT: u32 = 518_400; // ~30 days
+const INSTANCE_LIFETIME_THRESHOLD: u32 = 120_960; // ~7 days
+const PERSISTENT_BUMP_AMOUNT: u32 = 1_036_800; // ~60 days
+const PERSISTENT_LIFETIME_THRESHOLD: u32 = 241_920; // ~14 days
 
 #[contracttype]
 enum DataKey {
-    /// Admin address (set once during initialization)
     Admin,
-    /// Address of the deployed PriceGate oracle contract
     OracleAddress,
-    /// Address of the native XLM Stellar Asset Contract (SAC)
     XlmToken,
-    /// Auto-incrementing gate ID counter
     GateCount,
-    /// Individual gate config, keyed by gate ID
     Gate(u64),
 }
 
-
-
-/// Price condition that must be met to release escrowed funds.
 #[contracttype]
 #[derive(Clone, Debug, Eq, PartialEq)]
 pub enum Condition {
-    /// Release when price goes above the threshold
     PriceAbove,
-    /// Release when price drops below the threshold
     PriceBelow,
 }
 
-/// Current status of an escrow gate.
 #[contracttype]
 #[derive(Clone, Debug, Eq, PartialEq)]
 pub enum Status {
-    /// Funds are locked, waiting for condition or deadline
     Locked,
-    /// Condition was met — funds released to recipient
     Released,
-    /// Deadline passed without condition being met — funds refunded to sender
     Refunded,
 }
 
-/// Full configuration and state of an escrow gate.
 #[contracttype]
 #[derive(Clone, Debug)]
 pub struct GateConfig {
-    /// Address that created the gate and deposited funds
     pub sender: Address,
-    /// Address that receives funds if the price condition is met
     pub recipient: Address,
-    /// Amount of XLM locked (in stroops, i.e., 1 XLM = 10_000_000 stroops)
-    pub amount: i128,
-    /// Price threshold with 7 decimal places (e.g., $0.20 = 2_000_000)
-    pub threshold: i128,
-    /// Whether to release on price above or below threshold
+    pub amount: i128,     // in stroops (1 XLM = 10_000_000)
+    pub threshold: i128,  // 7 decimal places, e.g. $0.20 = 2_000_000
     pub condition: Condition,
-    /// Unix timestamp deadline — if reached without condition met, funds are refunded
-    pub deadline: u64,
-    /// Current status of this gate
+    pub deadline: u64,    // unix timestamp
     pub status: Status,
 }
-
-// ---------------------------------------------------------------------------
-// Errors
-// ---------------------------------------------------------------------------
 
 #[contracterror]
 #[derive(Copy, Clone, Debug, Eq, PartialEq, PartialOrd, Ord)]
 #[repr(u32)]
 pub enum EscrowError {
-    /// Contract has already been initialized
     AlreadyInitialized = 1,
-    /// Contract has not been initialized yet
     NotInitialized = 2,
-    /// No gate found with the given ID
     GateNotFound = 3,
-    /// Amount must be greater than zero
     InvalidAmount = 4,
-    /// Deadline must be in the future
     InvalidDeadline = 5,
-    /// Gate is not in Locked status (already released or refunded)
     GateNotLocked = 6,
-    /// Caller is not authorized for this operation
     Unauthorized = 7,
 }
-
-// ---------------------------------------------------------------------------
-// Contract
-// ---------------------------------------------------------------------------
 
 #[contract]
 pub struct EscrowContract;
 
 #[contractimpl]
 impl EscrowContract {
-   ` — address of the deployed PriceGate oracle contract
-    
     pub fn initialize(
         env: Env,
         admin: Address,
         oracle_address: Address,
         xlm_token: Address,
     ) -> Result<(), EscrowError> {
-        // Prevent double initialization
         if env.storage().instance().has(&DataKey::Admin) {
             return Err(EscrowError::AlreadyInitialized);
         }
@@ -144,8 +92,6 @@ impl EscrowContract {
         Ok(())
     }
 
-  
-   
     pub fn create_gate(
         env: Env,
         sender: Address,
@@ -155,10 +101,8 @@ impl EscrowContract {
         condition: Condition,
         deadline: u64,
     ) -> Result<u64, EscrowError> {
-        
         sender.require_auth();
 
-       
         if amount <= 0 {
             return Err(EscrowError::InvalidAmount);
         }
@@ -166,25 +110,22 @@ impl EscrowContract {
             return Err(EscrowError::InvalidDeadline);
         }
 
-        
         let xlm_token: Address = env
             .storage()
             .instance()
             .get(&DataKey::XlmToken)
             .ok_or(EscrowError::NotInitialized)?;
 
-       
+        // Lock XLM: sender → this contract
         let token_client = token::Client::new(&env, &xlm_token);
         token_client.transfer(&sender, &env.current_contract_address(), &amount);
 
-        
         let gate_id: u64 = env
             .storage()
             .instance()
             .get(&DataKey::GateCount)
             .ok_or(EscrowError::NotInitialized)?;
 
-        // Build the gate config
         let gate = GateConfig {
             sender: sender.clone(),
             recipient: recipient.clone(),
@@ -195,17 +136,13 @@ impl EscrowContract {
             status: Status::Locked,
         };
 
-        // Store gate in persistent storage (survives longer than instance)
         env.storage()
             .persistent()
             .set(&DataKey::Gate(gate_id), &gate);
-
-        // Update counter
         env.storage()
             .instance()
             .set(&DataKey::GateCount, &(gate_id + 1));
 
-        // Extend TTLs
         env.storage()
             .instance()
             .extend_ttl(INSTANCE_LIFETIME_THRESHOLD, INSTANCE_BUMP_AMOUNT);
@@ -215,16 +152,117 @@ impl EscrowContract {
             PERSISTENT_BUMP_AMOUNT,
         );
 
-        // Emit GateCreated event
         env.events()
             .publish((Symbol::new(&env, "GateCreated"), gate_id), gate.clone());
 
-        log!(&env, "PriceGate: Gate {} created, amount = {}", gate_id, amount);
-
+        log!(&env, "Gate {} created, amount = {}", gate_id, amount);
         Ok(gate_id)
     }
 
-    
+    /// Checks the price condition and releases or refunds. Callable by anyone.
+    /// - Deadline passed → refund to sender
+    /// - Condition met → release to recipient
+    /// - Otherwise → stays Locked
+    pub fn check_and_release(env: Env, gate_id: u64) -> Result<Status, EscrowError> {
+        let mut gate: GateConfig = env
+            .storage()
+            .persistent()
+            .get(&DataKey::Gate(gate_id))
+            .ok_or(EscrowError::GateNotFound)?;
+
+        if gate.status != Status::Locked {
+            return Err(EscrowError::GateNotLocked);
+        }
+
+        let xlm_token: Address = env
+            .storage()
+            .instance()
+            .get(&DataKey::XlmToken)
+            .ok_or(EscrowError::NotInitialized)?;
+
+        let token_client = token::Client::new(&env, &xlm_token);
+        let now = env.ledger().timestamp();
+
+        // Deadline passed → refund
+        if now >= gate.deadline {
+            token_client.transfer(
+                &env.current_contract_address(),
+                &gate.sender,
+                &gate.amount,
+            );
+
+            gate.status = Status::Refunded;
+            env.storage()
+                .persistent()
+                .set(&DataKey::Gate(gate_id), &gate);
+
+            env.events().publish(
+                (Symbol::new(&env, "GateRefunded"), gate_id),
+                gate.clone(),
+            );
+
+            log!(&env, "Gate {} refunded (deadline passed)", gate_id);
+            return Ok(Status::Refunded);
+        }
+
+        // Cross-contract call to oracle
+        let oracle_address: Address = env
+            .storage()
+            .instance()
+            .get(&DataKey::OracleAddress)
+            .ok_or(EscrowError::NotInitialized)?;
+
+        let oracle_client = OracleContractClient::new(&env, &oracle_address);
+        let xlm_symbol = Symbol::new(&env, "XLM");
+        let current_price = oracle_client.get_price(&xlm_symbol);
+
+        log!(
+            &env,
+            "Gate {}: price={}, threshold={}",
+            gate_id,
+            current_price,
+            gate.threshold,
+        );
+
+        // Check condition
+        let condition_met = match gate.condition {
+            Condition::PriceAbove => current_price > gate.threshold,
+            Condition::PriceBelow => current_price < gate.threshold,
+        };
+
+        if condition_met {
+            // Release to recipient
+            token_client.transfer(
+                &env.current_contract_address(),
+                &gate.recipient,
+                &gate.amount,
+            );
+
+            gate.status = Status::Released;
+            env.storage()
+                .persistent()
+                .set(&DataKey::Gate(gate_id), &gate);
+
+            env.events().publish(
+                (Symbol::new(&env, "GateReleased"), gate_id),
+                gate.clone(),
+            );
+
+            log!(&env, "Gate {} released to recipient", gate_id);
+            Ok(Status::Released)
+        } else {
+            // Condition not met, keep locked
+            env.storage().persistent().extend_ttl(
+                &DataKey::Gate(gate_id),
+                PERSISTENT_LIFETIME_THRESHOLD,
+                PERSISTENT_BUMP_AMOUNT,
+            );
+
+            log!(&env, "Gate {} still locked", gate_id);
+            Ok(Status::Locked)
+        }
+    }
+
     pub fn get_gate(env: Env, gate_id: u64) -> Result<GateConfig, EscrowError> {
         env.storage()
             .persistent()
@@ -232,15 +270,12 @@ impl EscrowContract {
             .ok_or(EscrowError::GateNotFound)
     }
 
-    /// Returns the total number of gates created.
     pub fn get_gate_count(env: Env) -> Result<u64, EscrowError> {
         env.storage()
             .instance()
             .get(&DataKey::GateCount)
             .ok_or(EscrowError::NotInitialized)
     }
-
-    // check_and_release will be added in Step 4
 }
 
 #[cfg(test)]
