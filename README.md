@@ -21,6 +21,8 @@ Live demo: https://pricegate-six.vercel.app
 - Uses a live Reflector price feed for XLM/USD.
 - Shows only the escrows created by the connected wallet in the UI.
 - Exposes the on-chain record in Stellar Explorer for verification.
+- Streams escrow updates to the UI with an SSE endpoint and refresh fallback.
+- Includes contract tests and frontend unit tests.
 
 ## Architecture
 

@@ -33,7 +33,7 @@ function toAddress(value: unknown): string {
   return String(value);
 }
 
-function parseCondition(raw: unknown): GateCondition {
+export function decodeGateCondition(raw: unknown): GateCondition {
   if (raw && typeof raw === "object" && !Array.isArray(raw) && "tag" in raw) {
     const condition = raw as { tag: unknown; values?: unknown[] };
     const kind = String(condition.tag);
@@ -55,7 +55,10 @@ function parseCondition(raw: unknown): GateCondition {
   }
 
   if (typeof raw === "string") {
-    return { kind: raw as "PriceAbove" | "PriceBelow", thresholdUsd: 0 };
+    if (raw === "PriceBelow") {
+      return { kind: "PriceBelow", thresholdUsd: 0 };
+    }
+    return { kind: "PriceAbove", thresholdUsd: 0 };
   }
 
   return { kind: "PriceAbove", thresholdUsd: 0 };
@@ -93,7 +96,7 @@ export async function fetchGateById(id: number): Promise<GateRecord> {
     sender: toAddress(gate.sender),
     recipient: toAddress(gate.recipient),
     amountXlm: toNumber(gate.amount) / 10_000_000,
-    condition: parseCondition(gate.condition),
+    condition: decodeGateCondition(gate.condition),
     deadline: toNumber(gate.deadline),
     status: String(gate.status) as GateStatus,
   };

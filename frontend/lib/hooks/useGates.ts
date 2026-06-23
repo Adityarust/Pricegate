@@ -23,6 +23,8 @@ export function useGates(intervalMs = 5_000): GateFeedData {
   useEffect(() => {
     let active = true;
     let firstRun = true;
+    let timer: number | null = null;
+    let source: EventSource | null = null;
 
     async function update() {
       if (!firstRun) setRefreshing(true);
@@ -42,11 +44,52 @@ export function useGates(intervalMs = 5_000): GateFeedData {
       }
     }
 
-    update();
-    const timer = window.setInterval(update, intervalMs);
+    async function startPollingFallback() {
+      if (!active) return;
+      await update();
+      timer = window.setInterval(update, intervalMs);
+    }
+
+    async function startStream() {
+      await update();
+      if (!active) return;
+
+      source = new EventSource("/api/gates/stream");
+      source.onmessage = (event) => {
+        if (!active) return;
+        try {
+          const nextPayload = JSON.parse(event.data) as GateRecord[] | { error?: string };
+          if (Array.isArray(nextPayload)) {
+            setGates(nextPayload);
+            setError(null);
+            setLastUpdated(Date.now());
+            setLoading(false);
+            setRefreshing(false);
+            firstRun = false;
+            return;
+          }
+
+          if (nextPayload && typeof nextPayload.error === "string") {
+            setError(nextPayload.error);
+          }
+        } catch (caught) {
+          setError(caught instanceof Error ? caught.message : "Unable to parse gate updates.");
+        }
+      };
+      source.onerror = () => {
+        if (!active) return;
+        source?.close();
+        source = null;
+        void startPollingFallback();
+      };
+    }
+
+    void startStream();
+
     return () => {
       active = false;
-      window.clearInterval(timer);
+      if (timer) window.clearInterval(timer);
+      source?.close();
     };
   }, [intervalMs]);
 
