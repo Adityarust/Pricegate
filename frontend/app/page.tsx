@@ -3,10 +3,12 @@
 import { motion } from "framer-motion";
 import { ArrowRightIcon, EyeIcon, LockKeyholeIcon, SendIcon, ShieldCheckIcon } from "lucide-react";
 
+import { Alert, AlertDescription } from "@/components/ui/alert";
 import { Badge } from "@/components/ui/badge";
 import { buttonVariants } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Separator } from "@/components/ui/separator";
+import { Skeleton } from "@/components/ui/skeleton";
 import { usePriceFeed } from "@/lib/hooks/usePriceFeed";
 import { cn } from "@/lib/utils";
 
@@ -61,7 +63,7 @@ export default function Home() {
             </Badge>
           </motion.div>
 
-          <h1 className="flex flex-col text-5xl leading-[0.98] font-semibold tracking-tight sm:text-6xl lg:text-8xl">
+          <h1 className="flex flex-col text-4xl leading-[0.98] font-semibold tracking-tight sm:text-6xl lg:text-8xl">
             <motion.span variants={fadeUp} transition={{ duration: 0.8 }}>Lock funds.</motion.span>
             <motion.span
               initial={{ opacity: 0, x: -40 }}
@@ -74,16 +76,16 @@ export default function Home() {
             <motion.span variants={fadeUp} transition={{ duration: 0.8 }}>Settle with certainty.</motion.span>
           </h1>
 
-          <motion.p variants={fadeUp} transition={{ duration: 0.8 }} className="max-w-2xl text-base leading-7 text-muted-foreground sm:text-lg">
+          <motion.p variants={fadeUp} transition={{ duration: 0.8 }} className="max-w-2xl text-sm leading-7 text-muted-foreground sm:text-lg">
             PriceGate turns a market condition into an enforceable Stellar escrow. No custodian, no manual payout, and no ambiguity.
           </motion.p>
 
-          <motion.div variants={fadeUp} transition={{ duration: 0.8 }} className="flex flex-col items-center gap-3 sm:flex-row">
+          <motion.div variants={fadeUp} transition={{ duration: 0.8 }} className="flex w-full flex-col items-center justify-center gap-3 sm:w-auto sm:flex-row sm:items-center">
             <motion.a
-              href="/gate/create"
+              href="/escrow/create"
               whileHover={{ scale: 1.05 }}
               whileTap={{ scale: 0.98 }}
-              className={cn(buttonVariants({ size: "lg" }), "relative min-w-44 overflow-hidden")}
+              className={cn(buttonVariants({ size: "lg" }), "relative w-full max-w-xs overflow-hidden sm:w-auto sm:min-w-40")}
             >
               <motion.span
                 aria-hidden="true"
@@ -92,23 +94,29 @@ export default function Home() {
                 whileHover={{ left: "120%" }}
                 transition={{ duration: 0.55, ease: "easeOut" }}
               />
-              Create a Gate
+              Create Escrow
               <ArrowRightIcon data-icon="inline-end" />
             </motion.a>
             <motion.a
               href="#how-it-works"
               whileHover={{ scale: 1.05 }}
               whileTap={{ scale: 0.98 }}
-              className={cn(buttonVariants({ variant: "outline", size: "lg" }), "min-w-44")}
+              className={cn(buttonVariants({ variant: "outline", size: "lg" }), "w-full max-w-xs sm:w-auto sm:min-w-40")}
             >
               See how it works
             </motion.a>
           </motion.div>
 
-          <motion.div variants={fadeUp} transition={{ duration: 0.8 }}>
-            <Badge variant="outline">
-              XLM/USD {loading ? "Loading" : error || price === null ? "Unavailable" : `$${price.toFixed(4)}`}
-            </Badge>
+          <motion.div variants={fadeUp} transition={{ duration: 0.8 }} className="flex w-full flex-col items-center gap-3 sm:w-auto">
+            {loading ? (
+              <Skeleton className="h-8 w-44 rounded-full" />
+            ) : error ? (
+              <Alert variant="destructive" className="w-full max-w-md text-left">
+                <AlertDescription>{error}</AlertDescription>
+              </Alert>
+            ) : (
+              <Badge variant="outline">XLM/USD {price === null ? "Unavailable" : `$${price.toFixed(4)}`}</Badge>
+            )}
           </motion.div>
         </motion.div>
 
@@ -140,7 +148,7 @@ export default function Home() {
             <p className="mt-4 leading-7 text-muted-foreground">Three steps move funds from intent to deterministic settlement.</p>
           </motion.div>
 
-          <div className="grid gap-5 md:grid-cols-3">
+          <div className="grid gap-5 sm:grid-cols-2 md:grid-cols-3">
             {features.map((feature, index) => {
               const Icon = feature.icon;
               return (

@@ -9,6 +9,7 @@ import { readContract } from "@/lib/stellar";
 interface PriceFeedData {
   price: number | null;
   loading: boolean;
+  refreshing: boolean;
   error: string | null;
 }
 
@@ -23,12 +24,15 @@ async function fetchOracleXlmPrice(): Promise<number> {
 export function usePriceFeed(intervalMs = 30_000): PriceFeedData {
   const [price, setPrice] = useState<number | null>(null);
   const [loading, setLoading] = useState(true);
+  const [refreshing, setRefreshing] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
     let active = true;
+    let firstRun = true;
 
     async function update() {
+      if (!firstRun) setRefreshing(true);
       try {
         const nextPrice = await fetchOracleXlmPrice();
         if (!active) return;
@@ -39,6 +43,8 @@ export function usePriceFeed(intervalMs = 30_000): PriceFeedData {
         setError(caught instanceof Error ? caught.message : "Oracle price is unavailable.");
       } finally {
         if (active) setLoading(false);
+        if (active) setRefreshing(false);
+        firstRun = false;
       }
     }
 
@@ -50,5 +56,5 @@ export function usePriceFeed(intervalMs = 30_000): PriceFeedData {
     };
   }, [intervalMs]);
 
-  return { price, loading, error };
+  return { price, loading, refreshing, error };
 }

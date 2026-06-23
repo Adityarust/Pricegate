@@ -20,7 +20,8 @@ import { cn } from "@/lib/utils";
 const links = [
   { label: "Features", href: "/#features" },
   { label: "How It Works", href: "/#how-it-works" },
-  { label: "Get Started", href: "/gate/create" },
+  { label: "Escrows", href: "/escrows" },
+  { label: "Get Started", href: "/escrow/create" },
 ];
 
 export default function PremiumNav() {

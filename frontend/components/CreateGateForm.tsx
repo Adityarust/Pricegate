@@ -23,6 +23,7 @@ import { ToggleGroup, ToggleGroupItem } from "@/components/ui/toggle-group";
 import { CONTRACTS } from "@/lib/contracts";
 import { callContract } from "@/lib/stellar";
 import { cn } from "@/lib/utils";
+import Link from "next/link";
 
 type GateCondition = "PriceAbove" | "PriceBelow";
 
@@ -41,7 +42,7 @@ export default function CreateGateForm() {
   async function handleSubmit(event: React.FormEvent) {
     event.preventDefault();
     if (!connected || !address) {
-      setError("Connect a Testnet Freighter wallet before creating a gate.");
+      setError("Connect a Testnet Freighter wallet before creating an escrow.");
       return;
     }
 
@@ -95,7 +96,7 @@ export default function CreateGateForm() {
       setRecipient("");
       setThreshold("");
     } catch (caught) {
-      setError(caught instanceof Error ? caught.message : "Gate creation failed.");
+      setError(caught instanceof Error ? caught.message : "Escrow creation failed.");
     } finally {
       setLoading(false);
     }
@@ -120,23 +121,28 @@ export default function CreateGateForm() {
         {success && (
           <Alert>
             <CircleCheckIcon />
-            <AlertTitle>Gate #{success.gateId} created</AlertTitle>
+            <AlertTitle>Escrow #{success.gateId} created</AlertTitle>
             <AlertDescription>
               Your XLM is now locked under the selected condition.{" "}
-              <a
-                href={`https://stellar.expert/explorer/testnet/tx/${success.txHash}`}
-                target="_blank"
-                rel="noopener noreferrer"
-                className={cn(buttonVariants({ variant: "link", size: "sm" }), "px-0")}
-              >
-                View transaction
-                <ExternalLinkIcon data-icon="inline-end" />
-              </a>
+              <span className="flex flex-wrap items-center gap-2">
+                <a
+                  href={`https://stellar.expert/explorer/testnet/tx/${success.txHash}`}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className={cn(buttonVariants({ variant: "link", size: "sm" }), "px-0")}
+                >
+                  View transaction
+                  <ExternalLinkIcon data-icon="inline-end" />
+                </a>
+                <Link href="/escrows" className={cn(buttonVariants({ variant: "outline", size: "sm" }))}>
+                  View escrows
+                </Link>
+              </span>
             </AlertDescription>
           </Alert>
         )}
 
-        <form id="create-gate-form" onSubmit={handleSubmit}>
+        <form id="create-gate-form" onSubmit={handleSubmit} className="w-full">
           <FieldGroup>
             <div className="grid gap-5 sm:grid-cols-2">
               <Field data-disabled={loading || undefined}>
@@ -172,24 +178,24 @@ export default function CreateGateForm() {
               </Field>
             </div>
 
-            <Field data-disabled={loading || undefined}>
-              <FieldLabel>Deadline preset</FieldLabel>
-              <ToggleGroup
-                value={customDeadline ? [] : [deadlineHours]}
-                onValueChange={(values) => {
+              <Field data-disabled={loading || undefined}>
+                <FieldLabel>Deadline preset</FieldLabel>
+                <ToggleGroup
+                  value={customDeadline ? [] : [deadlineHours]}
+                  onValueChange={(values) => {
                   if (!values[0]) return;
                   setDeadlineHours(values[0]);
                   setCustomDeadline("");
-                }}
-                disabled={loading}
-                variant="outline"
-                className="grid w-full grid-cols-3"
-              >
-                <ToggleGroupItem value="1">1 hour</ToggleGroupItem>
-                <ToggleGroupItem value="24">1 day</ToggleGroupItem>
-                <ToggleGroupItem value="168">7 days</ToggleGroupItem>
-              </ToggleGroup>
-            </Field>
+                  }}
+                  disabled={loading}
+                  variant="outline"
+                  className="grid w-full grid-cols-1 gap-2 sm:grid-cols-3"
+                >
+                  <ToggleGroupItem value="1" className="w-full">1 hour</ToggleGroupItem>
+                  <ToggleGroupItem value="24" className="w-full">1 day</ToggleGroupItem>
+                  <ToggleGroupItem value="168" className="w-full">7 days</ToggleGroupItem>
+                </ToggleGroup>
+              </Field>
 
             <Field data-disabled={loading || undefined}>
               <FieldLabel htmlFor="custom-deadline">Custom deadline</FieldLabel>
@@ -212,12 +218,12 @@ export default function CreateGateForm() {
       <CardFooter className="flex-col items-stretch gap-3 sm:flex-row sm:items-center sm:justify-between">
         <p className="text-xs text-muted-foreground">Testnet · Soroban escrow · Reflector pricing</p>
         {!connected ? (
-          <Button type="button" onClick={connect} disabled={walletLoading}>
+          <Button type="button" onClick={connect} disabled={walletLoading} className="w-full sm:w-auto">
             {walletLoading ? <Spinner data-icon="inline-start" /> : <LockKeyholeIcon data-icon="inline-start" />}
             Connect wallet
           </Button>
         ) : (
-          <Button type="submit" form="create-gate-form" disabled={loading}>
+          <Button type="submit" form="create-gate-form" disabled={loading} className="w-full sm:w-auto">
             {loading && <Spinner data-icon="inline-start" />}
             {loading ? "Awaiting signature" : "Create escrow"}
           </Button>
