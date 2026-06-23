@@ -201,7 +201,7 @@ export default function Home() {
           <Separator />
           <div className="flex flex-col gap-4 pt-8 text-sm text-muted-foreground sm:flex-row sm:items-center sm:justify-between">
             <p className="font-heading text-lg font-semibold text-foreground">PriceGate</p>
-            <p>Built on Stellar with Reflector Oracle.</p>
+            <p>Built on Stellar and Reflector Oracle.</p>
           </div>
         </div>
       </motion.footer>

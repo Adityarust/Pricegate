@@ -3,6 +3,7 @@
 
 use soroban_sdk::{contractclient, contracttype, Address, Env, Symbol};
 
+#[allow(dead_code)]
 #[contractclient(name = "ReflectorPulseClient")]
 pub trait ReflectorPulse {
     fn lastprice(env: Env, asset: Asset) -> Option<PriceData>;

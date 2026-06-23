@@ -1,0 +1,38 @@
+warning: trait `ReflectorPulse` is never used
+ --> contracts/oracle/src/reflector.rs:7:11
+  |
+7 | pub trait ReflectorPulse {
+  |           ^^^^^^^^^^^^^^
+  |
+  = note: `#[warn(dead_code)]` (part of `#[warn(unused)]`) on by default
+
+warning: trait `OracleInterface` is never used
+ --> contracts/escrow/src/oracle.rs:6:11
+  |
+6 | pub trait OracleInterface {
+  |           ^^^^^^^^^^^^^^^
+  |
+  = note: `#[warn(dead_code)]` (part of `#[warn(unused)]`) on by default
+
+warning: `pricegate-oracle` (lib test) generated 1 warning
+warning: `pricegate-escrow` (lib test) generated 1 warning
+    Finished `test` profile [unoptimized + debuginfo] target(s) in 0.77s
+     Running unittests src/lib.rs (target/debug/deps/pricegate_escrow-402b0b3428894892)
+
+running 5 tests
+test test::test_create_gate ... ok
+test test::test_refund_on_deadline_passed ... ok
+test test::test_release_when_price_above ... ok
+test test::test_release_when_price_below ... ok
+test test::test_unauthorized_caller_fails - should panic ... ok
+
+test result: ok. 5 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.08s
+
+     Running unittests src/lib.rs (target/debug/deps/pricegate_oracle-3a9f0c433d7fab37)
+
+running 2 tests
+test test::test_decimals_returns_seven ... ok
+test test::test_get_price_returns_value ... ok
+
+test result: ok. 2 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.03s
+
