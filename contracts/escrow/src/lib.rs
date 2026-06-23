@@ -44,10 +44,10 @@ pub enum Status {
 pub struct GateConfig {
     pub sender: Address,
     pub recipient: Address,
-    pub amount: i128,     // in stroops (1 XLM = 10_000_000)
-    pub threshold: i128,  // 7 decimal places, e.g. $0.20 = 2_000_000
+    pub amount: i128,    // in stroops (1 XLM = 10_000_000)
+    pub threshold: i128, // 7 decimal places, e.g. $0.20 = 2_000_000
     pub condition: Condition,
-    pub deadline: u64,    // unix timestamp
+    pub deadline: u64, // unix timestamp
     pub status: Status,
 }
 
@@ -83,9 +83,7 @@ impl EscrowContract {
         env.storage()
             .instance()
             .set(&DataKey::OracleAddress, &oracle_address);
-        env.storage()
-            .instance()
-            .set(&DataKey::XlmToken, &xlm_token);
+        env.storage().instance().set(&DataKey::XlmToken, &xlm_token);
         env.storage().instance().set(&DataKey::GateCount, &0u64);
 
         log!(&env, "PriceGate Escrow initialized");
@@ -185,21 +183,15 @@ impl EscrowContract {
 
         // Deadline passed → refund
         if now >= gate.deadline {
-            token_client.transfer(
-                &env.current_contract_address(),
-                &gate.sender,
-                &gate.amount,
-            );
+            token_client.transfer(&env.current_contract_address(), &gate.sender, &gate.amount);
 
             gate.status = Status::Refunded;
             env.storage()
                 .persistent()
                 .set(&DataKey::Gate(gate_id), &gate);
 
-            env.events().publish(
-                (Symbol::new(&env, "GateRefunded"), gate_id),
-                gate.clone(),
-            );
+            env.events()
+                .publish((Symbol::new(&env, "GateRefunded"), gate_id), gate.clone());
 
             log!(&env, "Gate {} refunded (deadline passed)", gate_id);
             return Ok(Status::Refunded);
@@ -243,10 +235,8 @@ impl EscrowContract {
                 .persistent()
                 .set(&DataKey::Gate(gate_id), &gate);
 
-            env.events().publish(
-                (Symbol::new(&env, "GateReleased"), gate_id),
-                gate.clone(),
-            );
+            env.events()
+                .publish((Symbol::new(&env, "GateReleased"), gate_id), gate.clone());
 
             log!(&env, "Gate {} released to recipient", gate_id);
             Ok(Status::Released)

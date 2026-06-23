@@ -6,9 +6,7 @@
 mod reflector;
 
 use reflector::{Asset as ReflectorAsset, ReflectorPulseClient};
-use soroban_sdk::{
-    contract, contracterror, contractimpl, contracttype, log, Address, Env, Symbol,
-};
+use soroban_sdk::{contract, contracterror, contractimpl, contracttype, log, Address, Env, Symbol};
 
 const PRICE_DECIMALS: u32 = 7;
 const INSTANCE_BUMP_AMOUNT: u32 = 518_400; // ~30 days
