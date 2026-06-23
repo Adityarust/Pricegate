@@ -28,3 +28,7 @@ out/
 
 # Vercel
 .vercel/
+
+# Local agent skills
+.agents/
+skills-lock.json

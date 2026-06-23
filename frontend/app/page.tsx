@@ -1,179 +1,190 @@
 "use client";
 
+import { motion } from "framer-motion";
+import { ArrowRightIcon, EyeIcon, LockKeyholeIcon, SendIcon, ShieldCheckIcon } from "lucide-react";
+
+import { Badge } from "@/components/ui/badge";
+import { buttonVariants } from "@/components/ui/button";
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
+import { Separator } from "@/components/ui/separator";
 import { usePriceFeed } from "@/lib/hooks/usePriceFeed";
-import BoidsEcosystem from "@/components/BoidsEcosystem";
+import { cn } from "@/lib/utils";
+
+const features = [
+  {
+    step: "01",
+    title: "Lock XLM",
+    description: "Deposit XLM into a Soroban escrow with a recipient, price condition, and clear expiry.",
+    icon: LockKeyholeIcon,
+  },
+  {
+    step: "02",
+    title: "Oracle Watches",
+    description: "Reflector supplies the contract with an on-chain XLM/USD reference price.",
+    icon: EyeIcon,
+  },
+  {
+    step: "03",
+    title: "Release Securely",
+    description: "Anyone can trigger settlement. Matching conditions release funds; expiry returns them.",
+    icon: SendIcon,
+  },
+];
+
+const stats = [
+  { value: "100%", label: "On-chain escrow" },
+  { value: "<5s", label: "Ledger finality" },
+  { value: "2", label: "Soroban contracts" },
+];
+
+const fadeUp = {
+  hidden: { opacity: 0, y: 24 },
+  visible: { opacity: 1, y: 0 },
+};
 
 export default function Home() {
-  const { price, loading: priceLoading } = usePriceFeed(10000);
+  const { price, loading, error } = usePriceFeed();
 
   return (
-    <div className="relative min-h-[calc(100vh-4rem)] flex flex-col overflow-hidden">
-      {/* Background Boids flocking simulation */}
-      <div className="absolute inset-0 z-0">
-        <BoidsEcosystem
-          count={110}
-          background="#09090f"
-          palette={["#3b82f6", "#60a5fa", "#c084fc", "#f8fafc", "#1e293b"]}
-          cursorRadius={120}
-          agentShape="triangle"
-          className="h-full w-full !rounded-none opacity-80"
-        />
-      </div>
+    <div className="overflow-hidden">
+      <section id="features" className="mx-auto flex min-h-[calc(100vh-4.5rem)] max-w-7xl flex-col items-center justify-center px-5 py-20 text-center lg:px-8 lg:py-28">
+        <motion.div
+          initial="hidden"
+          animate="visible"
+          variants={{ visible: { transition: { staggerChildren: 0.14 } } }}
+          className="flex max-w-4xl flex-col items-center gap-7"
+        >
+          <motion.div variants={fadeUp} transition={{ duration: 0.8 }}>
+            <Badge variant="secondary" className="h-7 px-3">
+              <ShieldCheckIcon data-icon="inline-start" />
+              Stellar Network Powered
+            </Badge>
+          </motion.div>
 
-      <div className="relative z-10 flex-1 flex flex-col">
-      {/* Hero */}
-      <section className="flex-1 flex flex-col items-center justify-center px-4 py-20 sm:py-32 text-center">
-        {/* Live price badge */}
-        <div className="animate-fade-in mb-8">
-          <div className="inline-flex items-center gap-2 px-4 py-2 glass-card text-sm">
-            <span className="w-2 h-2 rounded-full bg-success animate-pulse" />
-            <span className="text-gray-400">XLM/USD</span>
-            <span className="font-mono font-semibold text-white">
-              {priceLoading ? "—" : `$${price.toFixed(4)}`}
-            </span>
-          </div>
-        </div>
-
-        <h1 className="animate-slide-up text-4xl sm:text-5xl md:text-6xl font-extrabold tracking-tight max-w-3xl leading-[1.1]">
-          Lock funds. Set conditions.{" "}
-          <span className="gradient-text">Let the contract decide.</span>
-        </h1>
-
-        <p className="animate-slide-up mt-6 text-lg sm:text-xl text-gray-400 max-w-xl leading-relaxed">
-          Create price-conditional escrows on Stellar. Your XLM is released
-          only when real-time oracle conditions are met.
-        </p>
-
-        <div className="animate-slide-up mt-10 flex flex-col sm:flex-row items-center gap-4">
-          <a href="#create" className="btn-primary text-base !px-8 !py-3.5 glow">
-            Create a Gate
-          </a>
-          <a
-            href="https://github.com"
-            target="_blank"
-            rel="noopener noreferrer"
-            className="btn-secondary text-base !px-8 !py-3.5"
-          >
-            View on GitHub
-          </a>
-        </div>
-
-        {/* Stats */}
-        <div className="animate-fade-in mt-20 grid grid-cols-3 gap-8 sm:gap-16 text-center">
-          <div>
-            <p className="text-2xl sm:text-3xl font-bold text-white">100%</p>
-            <p className="text-sm text-gray-500 mt-1">On-chain</p>
-          </div>
-          <div>
-            <p className="text-2xl sm:text-3xl font-bold text-white">
-              &lt;5s
-            </p>
-            <p className="text-sm text-gray-500 mt-1">Price Updates</p>
-          </div>
-          <div>
-            <p className="text-2xl sm:text-3xl font-bold text-white">
-              2
-            </p>
-            <p className="text-sm text-gray-500 mt-1">Contracts</p>
-          </div>
-        </div>
-      </section>
-
-      {/* How it works */}
-      <section className="px-4 pb-24 max-w-5xl mx-auto w-full">
-        <h2 className="text-2xl font-bold text-center mb-12">How it works</h2>
-        <div className="grid sm:grid-cols-3 gap-6">
-          {[
-            {
-              step: "01",
-              title: "Lock XLM",
-              desc: "Deposit XLM into a smart escrow with your price condition and deadline.",
-              icon: (
-                <path
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
-                  d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z"
-                />
-              ),
-            },
-            {
-              step: "02",
-              title: "Oracle Watches",
-              desc: "Reflector oracle provides real-time XLM/USD price data on-chain.",
-              icon: (
-                <path
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
-                  d="M15 12a3 3 0 11-6 0 3 3 0 016 0z M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"
-                />
-              ),
-            },
-            {
-              step: "03",
-              title: "Auto Release",
-              desc: "When your condition is met, funds are released. If deadline passes, you get a refund.",
-              icon: (
-                <path
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
-                  d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"
-                />
-              ),
-            },
-          ].map((item) => (
-            <div
-              key={item.step}
-              className="glass-card-hover p-6 sm:p-8 text-center group"
+          <h1 className="flex flex-col text-5xl leading-[0.98] font-semibold tracking-tight sm:text-6xl lg:text-8xl">
+            <motion.span variants={fadeUp} transition={{ duration: 0.8 }}>Lock funds.</motion.span>
+            <motion.span
+              initial={{ opacity: 0, x: -40 }}
+              animate={{ opacity: 1, x: 0 }}
+              transition={{ duration: 0.8, delay: 0.18, ease: "easeOut" }}
+              className="text-primary"
             >
-              <div className="w-12 h-12 mx-auto rounded-xl bg-accent/10 flex items-center justify-center mb-4 group-hover:bg-accent/20 transition-colors">
-                <svg
-                  className="w-6 h-6 text-accent-light"
-                  fill="none"
-                  viewBox="0 0 24 24"
-                  stroke="currentColor"
-                  strokeWidth={1.5}
-                >
-                  {item.icon}
-                </svg>
-              </div>
-              <div className="text-xs font-mono text-accent mb-2">
-                {item.step}
-              </div>
-              <h3 className="text-lg font-semibold text-white mb-2">
-                {item.title}
-              </h3>
-              <p className="text-sm text-gray-400 leading-relaxed">
-                {item.desc}
-              </p>
-            </div>
+              Set conditions.
+            </motion.span>
+            <motion.span variants={fadeUp} transition={{ duration: 0.8 }}>Settle with certainty.</motion.span>
+          </h1>
+
+          <motion.p variants={fadeUp} transition={{ duration: 0.8 }} className="max-w-2xl text-base leading-7 text-muted-foreground sm:text-lg">
+            PriceGate turns a market condition into an enforceable Stellar escrow. No custodian, no manual payout, and no ambiguity.
+          </motion.p>
+
+          <motion.div variants={fadeUp} transition={{ duration: 0.8 }} className="flex flex-col items-center gap-3 sm:flex-row">
+            <motion.a
+              href="/gate/create"
+              whileHover={{ scale: 1.05 }}
+              whileTap={{ scale: 0.98 }}
+              className={cn(buttonVariants({ size: "lg" }), "relative min-w-44 overflow-hidden")}
+            >
+              <motion.span
+                aria-hidden="true"
+                className="absolute inset-y-0 w-8 -skew-x-12 bg-primary-foreground/15"
+                initial={{ left: "-20%" }}
+                whileHover={{ left: "120%" }}
+                transition={{ duration: 0.55, ease: "easeOut" }}
+              />
+              Create a Gate
+              <ArrowRightIcon data-icon="inline-end" />
+            </motion.a>
+            <motion.a
+              href="#how-it-works"
+              whileHover={{ scale: 1.05 }}
+              whileTap={{ scale: 0.98 }}
+              className={cn(buttonVariants({ variant: "outline", size: "lg" }), "min-w-44")}
+            >
+              See how it works
+            </motion.a>
+          </motion.div>
+
+          <motion.div variants={fadeUp} transition={{ duration: 0.8 }}>
+            <Badge variant="outline">
+              XLM/USD {loading ? "Loading" : error || price === null ? "Unavailable" : `$${price.toFixed(4)}`}
+            </Badge>
+          </motion.div>
+        </motion.div>
+
+        <motion.div
+          initial="hidden"
+          whileInView="visible"
+          viewport={{ once: true, amount: 0.4 }}
+          variants={{ visible: { transition: { staggerChildren: 0.12 } } }}
+          className="mt-20 grid w-full max-w-3xl grid-cols-1 gap-3 sm:grid-cols-3"
+        >
+          {stats.map((stat) => (
+            <motion.div key={stat.label} variants={fadeUp} whileHover={{ y: -5, scale: 1.03 }} transition={{ duration: 0.3, ease: "easeOut" }}>
+              <Card className="h-full text-center shadow-none">
+                <CardHeader>
+                  <CardTitle className="text-3xl text-primary">{stat.value}</CardTitle>
+                  <CardDescription>{stat.label}</CardDescription>
+                </CardHeader>
+              </Card>
+            </motion.div>
           ))}
+        </motion.div>
+      </section>
+
+      <section id="how-it-works" className="scroll-mt-24 bg-secondary/30 px-5 py-24 lg:px-8 lg:py-32">
+        <div className="mx-auto max-w-7xl">
+          <motion.div initial="hidden" whileInView="visible" viewport={{ once: true, amount: 0.5 }} variants={fadeUp} transition={{ duration: 0.8 }} className="mx-auto mb-14 max-w-2xl text-center">
+            <Badge variant="outline">How it works</Badge>
+            <h2 className="mt-5 text-4xl font-semibold tracking-tight sm:text-5xl">Clear rules. Verifiable execution.</h2>
+            <p className="mt-4 leading-7 text-muted-foreground">Three steps move funds from intent to deterministic settlement.</p>
+          </motion.div>
+
+          <div className="grid gap-5 md:grid-cols-3">
+            {features.map((feature, index) => {
+              const Icon = feature.icon;
+              return (
+                <motion.div
+                  key={feature.title}
+                  initial={{ opacity: 0, y: 30 }}
+                  whileInView={{ opacity: 1, y: 0 }}
+                  viewport={{ once: true, amount: 0.35 }}
+                  transition={{ duration: 0.6, delay: index * 0.14 }}
+                  whileHover={{ y: -5, boxShadow: "0 18px 48px rgba(59, 74, 187, 0.15)" }}
+                  className="rounded-xl"
+                >
+                  <Card className="h-full">
+                    <CardHeader>
+                      <motion.div
+                        whileHover={{ rotate: index % 2 === 0 ? 5 : -5, scale: 1.1 }}
+                        transition={{ type: "spring", stiffness: 280, damping: 16 }}
+                        className="mb-5 flex size-11 items-center justify-center rounded-xl bg-secondary text-primary"
+                      >
+                        <Icon className="size-5" aria-hidden="true" />
+                      </motion.div>
+                      <Badge variant="outline">{feature.step}</Badge>
+                      <CardTitle className="mt-3 text-2xl">{feature.title}</CardTitle>
+                    </CardHeader>
+                    <CardContent>
+                      <p className="leading-7 text-muted-foreground">{feature.description}</p>
+                    </CardContent>
+                  </Card>
+                </motion.div>
+              );
+            })}
+          </div>
         </div>
       </section>
 
-      {/* Footer */}
-      <footer className="border-t border-surface-border py-8 px-4 text-center text-sm text-gray-500">
-        <p>
-          Built on{" "}
-          <a
-            href="https://stellar.org"
-            className="text-accent-light hover:underline"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            Stellar
-          </a>{" "}
-          with{" "}
-          <a
-            href="https://reflector.network"
-            className="text-accent-light hover:underline"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            Reflector Oracle
-          </a>
-        </p>
-      </footer>
-    </div>
+      <motion.footer initial={{ opacity: 0 }} whileInView={{ opacity: 1 }} viewport={{ once: true }} transition={{ duration: 0.8 }} className="px-5 py-10 lg:px-8">
+        <div className="mx-auto max-w-7xl">
+          <Separator />
+          <div className="flex flex-col gap-4 pt-8 text-sm text-muted-foreground sm:flex-row sm:items-center sm:justify-between">
+            <p className="font-heading text-lg font-semibold text-foreground">PriceGate</p>
+            <p>Built on Stellar with Reflector Oracle.</p>
+          </div>
+        </div>
+      </motion.footer>
     </div>
   );
 }

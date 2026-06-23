@@ -1,88 +1,87 @@
-@import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&family=JetBrains+Mono:wght@400;500;600&display=swap');
+@import "tailwindcss";
+@import "tw-animate-css";
+@import "shadcn/tailwind.css";
 
-@tailwind base;
-@tailwind components;
-@tailwind utilities;
+@custom-variant dark (&:is(.dark *));
+
+@theme inline {
+  --font-sans: "Inter Variable", sans-serif;
+  --font-heading: "Playfair Display Variable", serif;
+  --color-background: var(--background);
+  --color-foreground: var(--foreground);
+  --color-card: var(--card);
+  --color-card-foreground: var(--card-foreground);
+  --color-popover: var(--popover);
+  --color-popover-foreground: var(--popover-foreground);
+  --color-primary: var(--primary);
+  --color-primary-foreground: var(--primary-foreground);
+  --color-secondary: var(--secondary);
+  --color-secondary-foreground: var(--secondary-foreground);
+  --color-muted: var(--muted);
+  --color-muted-foreground: var(--muted-foreground);
+  --color-accent: var(--accent);
+  --color-accent-foreground: var(--accent-foreground);
+  --color-destructive: var(--destructive);
+  --color-border: var(--border);
+  --color-input: var(--input);
+  --color-ring: var(--ring);
+  --radius-sm: calc(var(--radius) * 0.6);
+  --radius-md: calc(var(--radius) * 0.8);
+  --radius-lg: var(--radius);
+  --radius-xl: calc(var(--radius) * 1.4);
+  --radius-2xl: calc(var(--radius) * 1.8);
+  --radius-3xl: calc(var(--radius) * 2.2);
+  --radius-4xl: calc(var(--radius) * 2.6);
+}
 
 :root {
-  --background: #09090f;
-  --foreground: #e4e4ed;
+  --background: oklch(0.98 0.008 85);
+  --foreground: oklch(0.15 0.015 265);
+  --card: oklch(1 0 0);
+  --card-foreground: oklch(0.15 0.015 265);
+  --popover: oklch(1 0 0);
+  --popover-foreground: oklch(0.15 0.015 265);
+  --primary: oklch(0.47 0.18 274);
+  --primary-foreground: oklch(0.99 0 0);
+  --secondary: oklch(0.94 0.025 274);
+  --secondary-foreground: oklch(0.24 0.04 274);
+  --muted: oklch(0.95 0.01 85);
+  --muted-foreground: oklch(0.55 0.018 265);
+  --accent: oklch(0.94 0.025 274);
+  --accent-foreground: oklch(0.31 0.12 274);
+  --destructive: oklch(0.58 0.22 27);
+  --border: oklch(0.9 0.015 270);
+  --input: oklch(0.9 0.015 270);
+  --ring: oklch(0.47 0.18 274);
+  --radius: 0.75rem;
 }
 
-* {
-  box-sizing: border-box;
-  margin: 0;
-  padding: 0;
-}
-
-body {
-  background: var(--background);
-  color: var(--foreground);
-  font-family: 'Inter', system-ui, sans-serif;
-  -webkit-font-smoothing: antialiased;
-  -moz-osx-font-smoothing: grayscale;
-}
-
-/* Scrollbar */
-::-webkit-scrollbar {
-  width: 6px;
-}
-::-webkit-scrollbar-track {
-  background: #111118;
-}
-::-webkit-scrollbar-thumb {
-  background: #2a2a3a;
-  border-radius: 3px;
-}
-
-/* Glass card */
-@layer components {
-  .glass-card {
-    @apply bg-surface-light/60 backdrop-blur-xl border border-surface-border rounded-2xl;
+@layer base {
+  * {
+    @apply border-border outline-ring/50;
   }
 
-  .glass-card-hover {
-    @apply glass-card transition-all duration-300 hover:border-accent/30 hover:shadow-lg hover:shadow-accent/5;
+  html {
+    scroll-behavior: smooth;
   }
 
-  .btn-primary {
-    @apply bg-accent hover:bg-accent-dark text-white font-medium px-6 py-3 rounded-xl transition-all duration-200 active:scale-[0.98] disabled:opacity-50 disabled:cursor-not-allowed;
+  body {
+    @apply bg-background text-foreground font-sans antialiased;
   }
 
-  .btn-secondary {
-    @apply bg-surface-light border border-surface-border hover:border-accent/40 text-foreground font-medium px-6 py-3 rounded-xl transition-all duration-200 active:scale-[0.98];
+  h1,
+  h2,
+  h3,
+  h4 {
+    @apply font-heading;
   }
 
-  .input-field {
-    @apply w-full bg-surface border border-surface-border rounded-xl px-4 py-3 text-foreground placeholder:text-gray-500 focus:outline-none focus:border-accent/50 focus:ring-1 focus:ring-accent/20 transition-all duration-200;
-  }
-
-  .label {
-    @apply text-sm font-medium text-gray-400 mb-1.5 block;
-  }
-
-  .status-badge {
-    @apply inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-semibold uppercase tracking-wider;
+  button:not(:disabled),
+  [role="button"]:not(:disabled) {
+    cursor: pointer;
   }
 }
 
-/* Gradient text */
-.gradient-text {
-  background: linear-gradient(135deg, #818cf8 0%, #6366f1 50%, #a78bfa 100%);
-  -webkit-background-clip: text;
-  -webkit-text-fill-color: transparent;
-  background-clip: text;
-}
-
-/* Subtle grid background */
-.bg-grid {
-  background-image: 
-    linear-gradient(rgba(99, 102, 241, 0.03) 1px, transparent 1px),
-    linear-gradient(90deg, rgba(99, 102, 241, 0.03) 1px, transparent 1px);
-  background-size: 60px 60px;
-}
-
-/* Glow effect */
-.glow {
-  box-shadow: 0 0 40px rgba(99, 102, 241, 0.15), 0 0 80px rgba(99, 102, 241, 0.05);
+::selection {
+  background: color-mix(in oklch, var(--primary) 20%, transparent);
 }

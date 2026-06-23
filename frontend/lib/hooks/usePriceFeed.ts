@@ -1,86 +1,54 @@
 "use client";
 
-import { useEffect, useRef, useState } from "react";
-import { horizon } from "@/lib/stellar";
+import { useEffect, useState } from "react";
+import * as StellarSdk from "@stellar/stellar-sdk";
+
+import { CONTRACTS } from "@/lib/contracts";
+import { readContract } from "@/lib/stellar";
 
 interface PriceFeedData {
-  price: number;
-  change24h: number;
+  price: number | null;
   loading: boolean;
   error: string | null;
 }
 
-// Fetches XLM/USD price from Horizon trade aggregations
-async function fetchXlmPrice(): Promise<number> {
-  try {
-    const res = await fetch(
-      `${horizon.serverURL}/trade_aggregations?` +
-        new URLSearchParams({
-          base_asset_type: "native",
-          counter_asset_type: "credit_alphanum4",
-          counter_asset_code: "USD",
-          counter_asset_issuer:
-            "GDUKMGUGDZQK6YHYA5Z6AY2G4XDSZPSZ3SW5UN3ARVMO6QSRDWP5YLEX",
-          resolution: "900000", // 15 min candles
-          limit: "1",
-          order: "desc",
-        })
-    );
-
-    if (!res.ok) throw new Error("Failed to fetch price");
-
-    const data = await res.json();
-    if (data._embedded?.records?.length > 0) {
-      return parseFloat(data._embedded.records[0].avg);
-    }
-
-    // Fallback: use a reasonable testnet price
-    return 0.12;
-  } catch {
-    return 0.12; // fallback
-  }
+async function fetchOracleXlmPrice(): Promise<number> {
+  const rawPrice = await readContract(CONTRACTS.oracle, "get_price", [
+    StellarSdk.nativeToScVal("XLM", { type: "symbol" }),
+  ]);
+  const normalized = typeof rawPrice === "bigint" ? rawPrice : BigInt(String(rawPrice));
+  return Number(normalized) / 10_000_000;
 }
 
-export function usePriceFeed(intervalMs: number = 5000): PriceFeedData {
-  const [price, setPrice] = useState<number>(0);
-  const [change24h, setChange24h] = useState<number>(0);
+export function usePriceFeed(intervalMs = 30_000): PriceFeedData {
+  const [price, setPrice] = useState<number | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
-  const prevPrice = useRef<number>(0);
 
   useEffect(() => {
-    let mounted = true;
+    let active = true;
 
-    const update = async () => {
+    async function update() {
       try {
-        const newPrice = await fetchXlmPrice();
-        if (!mounted) return;
-
-        if (prevPrice.current > 0) {
-          const diff =
-            ((newPrice - prevPrice.current) / prevPrice.current) * 100;
-          setChange24h(diff);
-        }
-
-        prevPrice.current = newPrice;
-        setPrice(newPrice);
+        const nextPrice = await fetchOracleXlmPrice();
+        if (!active) return;
+        setPrice(nextPrice);
         setError(null);
-      } catch (err) {
-        if (!mounted) return;
-        setError(err instanceof Error ? err.message : "Price fetch failed");
+      } catch (caught) {
+        if (!active) return;
+        setError(caught instanceof Error ? caught.message : "Oracle price is unavailable.");
       } finally {
-        if (mounted) setLoading(false);
+        if (active) setLoading(false);
       }
-    };
+    }
 
     update();
-    const timer = setInterval(update, intervalMs);
-
+    const timer = window.setInterval(update, intervalMs);
     return () => {
-      mounted = false;
-      clearInterval(timer);
+      active = false;
+      window.clearInterval(timer);
     };
   }, [intervalMs]);
 
-  return { price, change24h, loading, error };
+  return { price, loading, error };
 }

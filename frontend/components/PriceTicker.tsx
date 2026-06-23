@@ -1,10 +1,21 @@
 "use client";
 
-// PriceTicker — Step 9
+import { Badge } from "@/components/ui/badge";
+import { Card, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
+import { usePriceFeed } from "@/lib/hooks/usePriceFeed";
+
 export default function PriceTicker() {
+  const { price, loading, error } = usePriceFeed();
+
   return (
-    <div className="glass-card p-4">
-      <p className="text-gray-500 text-sm">Live price ticker — coming soon</p>
-    </div>
+    <Card size="sm">
+      <CardHeader>
+        <CardTitle>XLM/USD</CardTitle>
+        <CardDescription>Current reference price</CardDescription>
+        <Badge variant="secondary">
+          {loading ? "Loading" : error || price === null ? "Unavailable" : `$${price.toFixed(4)}`}
+        </Badge>
+      </CardHeader>
+    </Card>
   );
 }

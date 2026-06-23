@@ -1,11 +1,13 @@
 "use client";
 
-import { useCallback, useEffect, useState } from "react";
-import {
-  isConnected,
-  getAddress,
-  requestAccess,
-} from "@stellar/freighter-api";
+import { createContext, useCallback, useContext, useEffect, useMemo, useState } from "react";
+import type { ReactNode } from "react";
+import { getAddress, getNetwork, isConnected, requestAccess } from "@stellar/freighter-api";
+import { PlugIcon, UnplugIcon, WalletIcon } from "lucide-react";
+
+import { Badge } from "@/components/ui/badge";
+import { Button } from "@/components/ui/button";
+import { Spinner } from "@/components/ui/spinner";
 import { shortenAddress } from "@/lib/stellar";
 
 interface WalletState {
@@ -13,114 +15,154 @@ interface WalletState {
   connected: boolean;
   loading: boolean;
   error: string | null;
+  network: string | null;
 }
 
-export function useWallet() {
+interface WalletContextValue extends WalletState {
+  connect: () => Promise<void>;
+  disconnect: () => void;
+}
+
+const WalletContext = createContext<WalletContextValue | null>(null);
+
+function withTimeout<T>(promise: Promise<T>, timeoutMs = 15_000): Promise<T> {
+  return Promise.race([
+    promise,
+    new Promise<T>((_, reject) =>
+      window.setTimeout(() => reject(new Error("Freighter did not respond. Unlock the extension and try again.")), timeoutMs)
+    ),
+  ]);
+}
+
+export function WalletProvider({ children }: { children: ReactNode }) {
   const [state, setState] = useState<WalletState>({
     address: null,
     connected: false,
     loading: true,
     error: null,
+    network: null,
   });
 
-  // Check if already connected on mount
   useEffect(() => {
-    const check = async () => {
+    let active = true;
+
+    async function restoreConnection() {
       try {
-        const connected = await isConnected();
-        if (connected) {
-          const { address } = await getAddress();
-          if (address) {
-            setState({
-              address,
-              connected: true,
-              loading: false,
-              error: null,
-            });
-            return;
-          }
-        }
+        const connection = await isConnected();
+        if (connection.error || !connection.isConnected) return;
+
+        const addressResult = await getAddress();
+        if (addressResult.error || !addressResult.address) return;
+
+        const networkResult = await getNetwork();
+        if (!active) return;
+        setState({
+          address: addressResult.address,
+          connected: true,
+          loading: false,
+          error: null,
+          network: networkResult.error ? null : networkResult.network,
+        });
       } catch {
-        // Freighter not installed or not connected
+        // A missing or locked extension is a valid disconnected state on load.
+      } finally {
+        if (active) setState((current) => ({ ...current, loading: false }));
       }
-      setState((s) => ({ ...s, loading: false }));
+    }
+
+    restoreConnection();
+    return () => {
+      active = false;
     };
-    check();
   }, []);
 
   const connect = useCallback(async () => {
-    setState((s) => ({ ...s, loading: true, error: null }));
+    setState((current) => ({ ...current, loading: true, error: null }));
     try {
-      const { address } = await requestAccess();
+      const connection = await isConnected();
+      if (connection.error || !connection.isConnected) {
+        throw new Error("Freighter wallet was not detected. Install or enable the browser extension.");
+      }
+
+      const access = await withTimeout(requestAccess());
+      if (access.error) throw new Error(access.error.message || "Wallet access was denied.");
+      if (!access.address) throw new Error("Freighter returned no wallet address.");
+
+      const networkResult = await getNetwork();
+      const network = networkResult.error ? null : networkResult.network;
+      if (network && network !== "TESTNET") {
+        throw new Error(`Switch Freighter to TESTNET. It is currently using ${network}.`);
+      }
+
       setState({
-        address,
+        address: access.address,
         connected: true,
         loading: false,
         error: null,
+        network,
       });
-    } catch (err) {
+    } catch (error) {
       setState({
         address: null,
         connected: false,
         loading: false,
-        error: err instanceof Error ? err.message : "Failed to connect wallet",
+        error: error instanceof Error ? error.message : "Failed to connect Freighter.",
+        network: null,
       });
     }
   }, []);
 
   const disconnect = useCallback(() => {
-    setState({
-      address: null,
-      connected: false,
-      loading: false,
-      error: null,
-    });
+    setState({ address: null, connected: false, loading: false, error: null, network: null });
   }, []);
 
-  return { ...state, connect, disconnect };
+  const value = useMemo(() => ({ ...state, connect, disconnect }), [state, connect, disconnect]);
+  return <WalletContext.Provider value={value}>{children}</WalletContext.Provider>;
+}
+
+export function useWallet() {
+  const context = useContext(WalletContext);
+  if (!context) throw new Error("useWallet must be used inside WalletProvider.");
+  return context;
 }
 
 export default function WalletConnect() {
-  const { address, connected, loading, error, connect, disconnect } =
-    useWallet();
+  const { address, connected, loading, error, network, connect, disconnect } = useWallet();
 
   if (loading) {
     return (
-      <button className="btn-secondary opacity-70 cursor-wait" disabled>
-        <span className="inline-block w-4 h-4 border-2 border-gray-400 border-t-transparent rounded-full animate-spin mr-2" />
-        Connecting...
-      </button>
+      <Button variant="outline" disabled>
+        <Spinner data-icon="inline-start" />
+        Connecting
+      </Button>
     );
   }
 
   if (connected && address) {
     return (
-      <div className="flex items-center gap-3">
-        <div className="hidden sm:flex items-center gap-2 px-4 py-2 glass-card text-sm">
-          <span className="w-2 h-2 rounded-full bg-success animate-pulse-slow" />
-          <span className="font-mono text-gray-300">
-            {shortenAddress(address)}
-          </span>
-        </div>
-        <button
-          onClick={disconnect}
-          className="btn-secondary text-sm !px-4 !py-2 hover:text-danger"
-        >
+      <div className="flex flex-wrap items-center gap-2">
+        <Badge variant="secondary">
+          <WalletIcon data-icon="inline-start" />
+          {shortenAddress(address)} · {network ?? "Stellar"}
+        </Badge>
+        <Button variant="outline" size="sm" onClick={disconnect}>
+          <UnplugIcon data-icon="inline-start" />
           Disconnect
-        </button>
+        </Button>
       </div>
     );
   }
 
   return (
-    <div className="flex items-center gap-2">
-      <button onClick={connect} className="btn-primary text-sm !px-5 !py-2.5">
+    <div className="flex flex-wrap items-center gap-2">
+      <Button onClick={connect}>
+        <PlugIcon data-icon="inline-start" />
         Connect Wallet
-      </button>
+      </Button>
       {error && (
-        <span className="text-xs text-danger max-w-[200px] truncate">
+        <Badge variant="destructive" title={error} className="max-w-56 truncate">
           {error}
-        </span>
+        </Badge>
       )}
     </div>
   );

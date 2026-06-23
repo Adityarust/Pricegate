@@ -1,10 +1,16 @@
 "use client";
 
-// GateStatus — Step 10
+import { Badge } from "@/components/ui/badge";
+import { Card, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
+
 export default function GateStatus() {
   return (
-    <div className="glass-card p-6">
-      <p className="text-gray-500 text-sm">Gate status display — coming soon</p>
-    </div>
+    <Card size="sm">
+      <CardHeader>
+        <CardTitle>Gate status</CardTitle>
+        <CardDescription>On-chain status retrieval is not connected yet.</CardDescription>
+        <Badge variant="outline">Pending integration</Badge>
+      </CardHeader>
+    </Card>
   );
 }

@@ -65,7 +65,9 @@ export default function BoidsEcosystem({
   // All non-`count` props read from this ref each frame, so prop changes
   // don't tear down the simulation.
   const liveRef = useRef({ background, palette, cursorRadius, attractors, agentShape });
-  liveRef.current = { background, palette, cursorRadius, attractors, agentShape };
+  useEffect(() => {
+    liveRef.current = { background, palette, cursorRadius, attractors, agentShape };
+  }, [background, palette, cursorRadius, attractors, agentShape]);
  
   useEffect(() => {
     const canvas = canvasRef.current;
