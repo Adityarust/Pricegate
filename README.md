@@ -68,6 +68,20 @@ frontend/    Next.js frontend
 - ![CI/CD](image.png)
 ![Cargo test](image-4.png)
 
+## Demo Video
+
+<div style="position: relative; padding-bottom: 56.25%; height: 0;">
+  <iframe
+    id="js_video_iframe"
+    src="https://jumpshare.com/embed/YE3KCLLhaPSW0XILDZm9"
+    frameborder="0"
+    webkitallowfullscreen
+    mozallowfullscreen
+    allowfullscreen
+    style="position: absolute; top: 0; left: 0; width: 100%; height: 100%;"
+  ></iframe>
+</div>
+
 ## Local Setup
 
 ### Contracts
