@@ -12,7 +12,8 @@ import { Skeleton } from "@/components/ui/skeleton";
 import { Spinner } from "@/components/ui/spinner";
 import { useWallet } from "@/components/WalletConnect";
 import { escrowExplorerUrl } from "@/lib/explorer";
-import { describeGateCondition, useGates } from "@/lib/gates";
+import { describeGateCondition } from "@/lib/gates";
+import { useGates } from "@/lib/hooks/useGates";
 import { shortenAddress } from "@/lib/stellar";
 import { cn } from "@/lib/utils";
 

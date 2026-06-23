@@ -45,7 +45,7 @@ pub enum Status {
 pub struct GateConfig {
     pub sender: Address,
     pub recipient: Address,
-    pub amount: i128,    // in stroops (1 XLM = 10_000_000)
+    pub amount: i128, // in stroops (1 XLM = 10_000_000)
     pub condition: Condition,
     pub deadline: u64, // unix timestamp
     pub status: Status,
@@ -206,12 +206,7 @@ impl EscrowContract {
         let xlm_symbol = Symbol::new(&env, "XLM");
         let current_price = oracle_client.get_price(&xlm_symbol);
 
-        log!(
-            &env,
-            "Gate {}: price={}",
-            gate_id,
-            current_price
-        );
+        log!(&env, "Gate {}: price={}", gate_id, current_price);
 
         // Check condition
         let condition_met = match gate.condition {

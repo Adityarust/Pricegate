@@ -86,9 +86,9 @@ fn test_create_gate() {
     let gate_id = t.escrow.create_gate(
         &t.sender,
         &t.recipient,
-        &100_0000000i128, // 100 XLM
+        &100_0000000i128,                      // 100 XLM
         &Condition::PriceAbove(2_000_000i128), // $0.20 threshold
-        &2000u64, // deadline
+        &2000u64,                              // deadline
     );
 
     assert_eq!(gate_id, 0);
