@@ -1,43 +1,46 @@
 # PriceGate
 
+[![Test Contracts](https://github.com/Adityarust/Pricegate/actions/workflows/test.yml/badge.svg)](https://github.com/Adityarust/Pricegate/actions/workflows/test.yml)
+
 > Lock funds. Set conditions. Let the contract decide.
 
-A Stellar dApp that locks XLM in an escrow contract which only releases funds when a price condition is met.
+PriceGate is a Stellar escrow dApp that locks XLM and releases it when a price condition is met.
 
-Built on [Soroban](https://soroban.stellar.org/) smart contracts with [Reflector Protocol](https://reflector.network/) oracle integration.
+Live demo: https://pricegate-six.vercel.app
 
-## Status
+## Deployed Testnet Contracts
 
-🚧 Under active development
+- Escrow contract: `CCSLZPGH365KUILNPFQ54HOQOSBWRL5Y5OVFP4M5S22GTDTYVCJV6TGM`
+- Oracle contract: `CCS7PLDSW3KQJC5QDEMGFFMTEFPG2DDYPGQFXNQ6WURJSNPWTN466STU`
+- Create gate tx: `688a743900d04512520b4e091d9884b2b682b4fd87fe00051bb8d16a0b5e7b0b`
+- Release tx: `2fa08365672e57c65e8b6a9df6fbe67b1c033f9f41615fb9d4c6468ed4ca9948`
 
-## Architecture
+## What It Does
 
-```
-┌─────────────────────────────────────────────────┐
-│                  Frontend (Next.js)              │
-│         Freighter Wallet  ·  Horizon SSE         │
-└──────────────┬──────────────────┬────────────────┘
-               │                  │
-       ┌───────▼───────┐  ┌──────▼───────┐
-       │ Escrow Contract│  │ Oracle Contract│
-       │  (Soroban)     │──│  (Soroban)     │
-       └───────────────┘  └───────┬────────┘
-                                  │
-                          ┌───────▼────────┐
-                          │ Reflector Oracle│
-                          │  (Testnet)      │
-                          └────────────────┘
+- Creates a non-custodial escrow on Stellar Testnet.
+- Uses a live Reflector price feed for XLM/USD.
+- Shows only the escrows created by the connected wallet in the UI.
+- Exposes the on-chain record in Stellar Explorer for verification.
+
+## Repository Structure
+
+```text
+contracts/   Soroban oracle and escrow contracts
+frontend/    Next.js frontend
 ```
 
-## Setup
+## Screenshot Checklist
+
+Capture these before final submission:
+
+- Mobile UI at 375px width in Chrome DevTools
+- GitHub Actions pipeline showing the test workflow passing
+- `cargo test` output with 3+ passing tests
+
+## Local Setup
 
 ```bash
-# Install Rust + Soroban CLI
 rustup target add wasm32-unknown-unknown
-
-# Build contracts
 make build
-
-# Run tests
 make test
 ```

@@ -11,8 +11,10 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import { Skeleton } from "@/components/ui/skeleton";
 import { Spinner } from "@/components/ui/spinner";
 import { useWallet } from "@/components/WalletConnect";
+import { escrowExplorerUrl } from "@/lib/explorer";
 import { fetchGateById, type GateRecord } from "@/lib/gates";
 import { cn } from "@/lib/utils";
+import { ExternalLinkIcon } from "lucide-react";
 
 function statusVariant(status: string) {
   if (status === "Released") return "secondary";
@@ -199,6 +201,10 @@ export default function EscrowDetailPage() {
             <Link href="/escrow/create" className={cn(buttonVariants(), "w-full sm:w-fit")}>
               Create another escrow
             </Link>
+            <a href={escrowExplorerUrl()} target="_blank" rel="noopener noreferrer" className={cn(buttonVariants({ variant: "secondary" }), "w-full sm:w-fit")}>
+              View on Stellar Explorer
+              <ExternalLinkIcon data-icon="inline-end" />
+            </a>
           </div>
         </CardContent>
       </Card>

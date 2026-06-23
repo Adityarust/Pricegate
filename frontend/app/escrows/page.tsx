@@ -11,6 +11,7 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import { Skeleton } from "@/components/ui/skeleton";
 import { Spinner } from "@/components/ui/spinner";
 import { useWallet } from "@/components/WalletConnect";
+import { escrowExplorerUrl } from "@/lib/explorer";
 import { useGates } from "@/lib/hooks/useGates";
 import { shortenAddress } from "@/lib/stellar";
 import { cn } from "@/lib/utils";
@@ -118,42 +119,25 @@ export default function EscrowsPage() {
                       <div>
                         <CardTitle className="text-2xl">Escrow #{escrow.id}</CardTitle>
                         <CardDescription>
-                          {escrow.condition === "PriceAbove" ? "Release when XLM rises above the target." : "Release when XLM falls below the target."}
+                          {escrow.condition === "PriceAbove" ? "Price above target" : "Price below target"} · ${escrow.thresholdUsd.toFixed(4)} · {escrow.amountXlm.toFixed(7)} XLM
                         </CardDescription>
                       </div>
                       <Badge variant={statusVariant(escrow.status)}>{escrow.status}</Badge>
                     </div>
                   </CardHeader>
-                  <CardContent className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
-                    <div>
-                      <p className="text-sm text-muted-foreground">Condition</p>
-                      <p className="mt-1 font-medium">{escrow.condition}</p>
+                  <CardContent className="flex flex-col gap-4">
+                    <div className="flex flex-wrap gap-2 text-sm text-muted-foreground">
+                      <span>Deadline {new Date(escrow.deadline * 1000).toLocaleDateString()}</span>
+                      <span>Owner {shortenAddress(escrow.sender)}</span>
                     </div>
-                    <div>
-                      <p className="text-sm text-muted-foreground">Threshold</p>
-                      <p className="mt-1 font-medium">${escrow.thresholdUsd.toFixed(4)}</p>
-                    </div>
-                    <div>
-                      <p className="text-sm text-muted-foreground">Amount</p>
-                      <p className="mt-1 font-medium">{escrow.amountXlm.toFixed(7)} XLM</p>
-                    </div>
-                    <div>
-                      <p className="text-sm text-muted-foreground">Deadline</p>
-                      <p className="mt-1 font-medium">{new Date(escrow.deadline * 1000).toLocaleString()}</p>
-                    </div>
-                    <div className="sm:col-span-2">
-                      <p className="text-sm text-muted-foreground">Recipient</p>
-                      <p className="mt-1 break-all font-medium">{escrow.recipient}</p>
-                    </div>
-                    <div className="sm:col-span-2">
-                      <p className="text-sm text-muted-foreground">Sender</p>
-                      <p className="mt-1 break-all font-medium">{escrow.sender}</p>
-                    </div>
-                    <div className="sm:col-span-4">
-              <Link href={`/escrows/${escrow.id}`} className={cn(buttonVariants({ variant: "outline" }), "w-full sm:w-fit")}>
-                Open escrow details
-                <ArrowRightIcon data-icon="inline-end" />
-              </Link>
+                    <div className="flex flex-wrap gap-3">
+                      <Link href={`/escrows/${escrow.id}`} className={cn(buttonVariants({ variant: "outline" }), "w-full sm:w-fit")}>
+                        Open escrow details
+                        <ArrowRightIcon data-icon="inline-end" />
+                      </Link>
+                      <a href={escrowExplorerUrl()} target="_blank" rel="noopener noreferrer" className={cn(buttonVariants({ variant: "secondary" }), "w-full sm:w-fit")}>
+                        View on Stellar Explorer
+                      </a>
                     </div>
                   </CardContent>
                 </Card>
