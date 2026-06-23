@@ -10,10 +10,10 @@ Live demo: https://pricegate-six.vercel.app
 
 ## Deployed Testnet Contracts
 
-- Escrow contract: `CCSLZPGH365KUILNPFQ54HOQOSBWRL5Y5OVFP4M5S22GTDTYVCJV6TGM`
-- Oracle contract: `CCS7PLDSW3KQJC5QDEMGFFMTEFPG2DDYPGQFXNQ6WURJSNPWTN466STU`
-- Create gate tx: `688a743900d04512520b4e091d9884b2b682b4fd87fe00051bb8d16a0b5e7b0b`
-- Release tx: `2fa08365672e57c65e8b6a9df6fbe67b1c033f9f41615fb9d4c6468ed4ca9948`
+- Oracle contract: `CBABRFADXDYNVIUEUBAQJUS4S5OEFHP2ZTZF7TFJH5A5DVQAH5JEER7M`
+- Escrow contract: `CDRT2FH2LNJHHM5JVWHL5QUJOG3Z7WVEBE7EEUXNL7N65XEMNAMV4WEB`
+- Oracle deploy tx: `a16be60df401a5ed61f0e97cc45ee41dea14bcfe74137f530a554e4f2f77e7e7`
+- Escrow deploy tx: `5e57eede8bcc353c3f3665b1a001d6450c9433d378efa43fc857cd2e11f447f7`
 
 ## What It Does
 
@@ -87,6 +87,8 @@ npm install
 cp .env.example .env.local
 npm run dev
 ```
+
+For Vercel, set the same environment variables from `frontend/.env.example` in the project settings before deploying.
 
 ## Tech Stack
 
