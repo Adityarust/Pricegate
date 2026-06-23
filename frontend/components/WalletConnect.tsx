@@ -5,6 +5,7 @@ import type { ReactNode } from "react";
 import { getAddress, getNetwork, isConnected, requestAccess } from "@stellar/freighter-api";
 import { PlugIcon, UnplugIcon, WalletIcon } from "lucide-react";
 
+import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Spinner } from "@/components/ui/spinner";
@@ -154,15 +155,18 @@ export default function WalletConnect() {
   }
 
   return (
-    <div className="flex flex-wrap items-center gap-2">
-      <Button onClick={connect}>
+    <div className="flex w-full flex-col gap-2 sm:w-auto">
+      <div className="flex flex-wrap items-center gap-2">
+        <Button onClick={connect}>
         <PlugIcon data-icon="inline-start" />
         Connect Wallet
       </Button>
+      </div>
       {error && (
-        <Badge variant="destructive" title={error} className="max-w-56 truncate">
-          {error}
-        </Badge>
+        <Alert variant="destructive" className="w-full max-w-md">
+          <AlertTitle>Wallet connection failed</AlertTitle>
+          <AlertDescription className="break-words">{error}</AlertDescription>
+        </Alert>
       )}
     </div>
   );

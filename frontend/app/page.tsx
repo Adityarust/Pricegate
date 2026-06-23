@@ -7,6 +7,7 @@ import { Alert, AlertDescription } from "@/components/ui/alert";
 import { Badge } from "@/components/ui/badge";
 import { buttonVariants } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
+import BoidsEcosystem from "@/components/BoidsEcosystem";
 import { Separator } from "@/components/ui/separator";
 import { Skeleton } from "@/components/ui/skeleton";
 import { usePriceFeed } from "@/lib/hooks/usePriceFeed";
@@ -49,12 +50,23 @@ export default function Home() {
 
   return (
     <div className="overflow-hidden">
-      <section id="features" className="mx-auto flex min-h-[calc(100vh-4.5rem)] max-w-7xl flex-col items-center justify-center px-5 py-20 text-center lg:px-8 lg:py-28">
+      <section id="features" className="relative mx-auto flex min-h-[calc(100vh-4.5rem)] max-w-7xl flex-col items-center justify-center overflow-hidden bg-[#faf5ea] px-5 py-20 text-center lg:px-8 lg:py-28">
+        <div aria-hidden="true" className="pointer-events-none absolute inset-0">
+          <BoidsEcosystem
+            count={160}
+            background="#faf5ea"
+            agentShape="dot"
+            cursorRadius={96}
+            palette={["#4f60e0", "#6475e8", "#7f8ff0", "#9ba9f4"]}
+            className="absolute inset-0 rounded-none border-0 shadow-none"
+          />
+          <div className="absolute inset-0 bg-[#faf5ea]/34" />
+        </div>
         <motion.div
           initial="hidden"
           animate="visible"
           variants={{ visible: { transition: { staggerChildren: 0.14 } } }}
-          className="flex max-w-4xl flex-col items-center gap-7"
+          className="relative z-10 flex max-w-4xl flex-col items-center gap-7"
         >
           <motion.div variants={fadeUp} transition={{ duration: 0.8 }}>
             <Badge variant="secondary" className="h-7 px-3">
@@ -63,7 +75,7 @@ export default function Home() {
             </Badge>
           </motion.div>
 
-          <h1 className="flex flex-col text-4xl leading-[0.98] font-semibold tracking-tight sm:text-6xl lg:text-8xl">
+          <h1 className="flex flex-col text-4xl leading-[0.98] font-semibold tracking-tight sm:text-5xl lg:text-6xl">
             <motion.span variants={fadeUp} transition={{ duration: 0.8 }}>Lock funds.</motion.span>
             <motion.span
               initial={{ opacity: 0, x: -40 }}
@@ -125,11 +137,11 @@ export default function Home() {
           whileInView="visible"
           viewport={{ once: true, amount: 0.4 }}
           variants={{ visible: { transition: { staggerChildren: 0.12 } } }}
-          className="mt-20 grid w-full max-w-3xl grid-cols-1 gap-3 sm:grid-cols-3"
+          className="relative z-10 mt-20 grid w-full max-w-3xl grid-cols-1 gap-3 sm:grid-cols-3"
         >
           {stats.map((stat) => (
-            <motion.div key={stat.label} variants={fadeUp} whileHover={{ y: -5, scale: 1.03 }} transition={{ duration: 0.3, ease: "easeOut" }}>
-              <Card className="h-full text-center shadow-none">
+            <motion.div key={stat.label} variants={fadeUp} whileHover={{ y: -2, scale: 1.01 }} transition={{ duration: 0.25, ease: "easeOut" }}>
+              <Card className="h-full bg-white/75 text-center shadow-sm ring-1 ring-black/5 backdrop-blur-sm">
                 <CardHeader>
                   <CardTitle className="text-3xl text-primary">{stat.value}</CardTitle>
                   <CardDescription>{stat.label}</CardDescription>

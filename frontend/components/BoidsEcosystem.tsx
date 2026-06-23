@@ -247,9 +247,9 @@ export default function BoidsEcosystem({
  
   return (
     <div className={cn("relative h-full w-full overflow-hidden rounded-lg", className)}>
-      <canvas ref={canvasRef} className="absolute inset-0 h-full w-full" style={{ background }} />
+      <canvas ref={canvasRef} aria-hidden="true" className="pointer-events-none absolute inset-0 h-full w-full" style={{ background }} />
       {children && (
-        <div className="relative z-10 flex h-full items-center justify-center pointer-events-none w-full">
+        <div className="relative z-10 flex h-full w-full items-center justify-center">
           {children}
         </div>
       )}

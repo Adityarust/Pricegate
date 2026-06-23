@@ -83,8 +83,14 @@ export default function PremiumNav() {
               </SheetHeader>
               <div className="flex flex-col gap-2 px-4 pb-4">
                 {links.map((link) => (
-                  <SheetClose key={link.href} render={<a href={link.href} className="rounded-lg px-3 py-3 text-base font-medium hover:bg-muted" />}>
-                    {link.label}
+                  <SheetClose
+                    key={link.href}
+                    render={
+                      <button type="button" className="w-full rounded-lg px-3 py-3 text-left text-base font-medium hover:bg-muted">
+                        {link.label}
+                      </button>
+                    }
+                  >
                   </SheetClose>
                 ))}
                 <div className="pt-2">
