@@ -12,7 +12,7 @@ import { Skeleton } from "@/components/ui/skeleton";
 import { Spinner } from "@/components/ui/spinner";
 import { useWallet } from "@/components/WalletConnect";
 import { escrowExplorerUrl } from "@/lib/explorer";
-import { useGates } from "@/lib/hooks/useGates";
+import { describeGateCondition, useGates } from "@/lib/gates";
 import { shortenAddress } from "@/lib/stellar";
 import { cn } from "@/lib/utils";
 
@@ -118,9 +118,7 @@ export default function EscrowsPage() {
                     <div className="flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between">
                       <div>
                         <CardTitle className="text-2xl">Escrow #{escrow.id}</CardTitle>
-                        <CardDescription>
-                          {escrow.condition === "PriceAbove" ? "Price above target" : "Price below target"} · ${escrow.thresholdUsd.toFixed(4)} · {escrow.amountXlm.toFixed(7)} XLM
-                        </CardDescription>
+                        <CardDescription>{describeGateCondition(escrow.condition)} · {escrow.amountXlm.toFixed(7)} XLM</CardDescription>
                       </div>
                       <Badge variant={statusVariant(escrow.status)}>{escrow.status}</Badge>
                     </div>

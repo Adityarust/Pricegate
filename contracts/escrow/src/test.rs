@@ -87,8 +87,7 @@ fn test_create_gate() {
         &t.sender,
         &t.recipient,
         &100_0000000i128, // 100 XLM
-        &2_000_000i128,   // $0.20 threshold
-        &Condition::PriceAbove,
+        &Condition::PriceAbove(2_000_000i128), // $0.20 threshold
         &2000u64, // deadline
     );
 
@@ -98,8 +97,7 @@ fn test_create_gate() {
     assert_eq!(gate.sender, t.sender);
     assert_eq!(gate.recipient, t.recipient);
     assert_eq!(gate.amount, 100_0000000);
-    assert_eq!(gate.threshold, 2_000_000);
-    assert_eq!(gate.condition, Condition::PriceAbove);
+    assert_eq!(gate.condition, Condition::PriceAbove(2_000_000i128));
     assert_eq!(gate.deadline, 2000);
     assert_eq!(gate.status, Status::Locked);
     assert_eq!(t.escrow.get_gate_count(), 1);
@@ -113,8 +111,7 @@ fn test_release_when_price_above() {
         &t.sender,
         &t.recipient,
         &100_0000000i128,
-        &2_000_000i128, // release when > $0.20
-        &Condition::PriceAbove,
+        &Condition::PriceAbove(2_000_000i128), // release when > $0.20
         &2000u64,
     );
 
@@ -136,8 +133,7 @@ fn test_release_when_price_below() {
         &t.sender,
         &t.recipient,
         &100_0000000i128,
-        &2_000_000i128, // release when < $0.20
-        &Condition::PriceBelow,
+        &Condition::PriceBelow(2_000_000i128), // release when < $0.20
         &2000u64,
     );
 
@@ -159,8 +155,7 @@ fn test_refund_on_deadline_passed() {
         &t.sender,
         &t.recipient,
         &100_0000000i128,
-        &2_000_000i128,
-        &Condition::PriceAbove,
+        &Condition::PriceAbove(2_000_000i128),
         &2000u64,
     );
 
@@ -203,8 +198,29 @@ fn test_unauthorized_caller_fails() {
         &sender,
         &recipient,
         &100_0000000i128,
-        &2_000_000i128,
-        &Condition::PriceAbove,
+        &Condition::PriceAbove(2_000_000i128),
         &2000u64,
     );
+}
+
+#[test]
+fn test_release_when_price_in_range() {
+    let t = setup();
+
+    let gate_id = t.escrow.create_gate(
+        &t.sender,
+        &t.recipient,
+        &100_0000000i128,
+        &Condition::PriceRange(1_500_000i128, 2_500_000i128),
+        &2000u64,
+    );
+
+    // Set price inside the range: $0.20
+    t.oracle.set_price(&2_000_000i128);
+
+    let status = t.escrow.check_and_release(&gate_id);
+    assert_eq!(status, Status::Released);
+
+    let gate = t.escrow.get_gate(&gate_id);
+    assert_eq!(gate.status, Status::Released);
 }

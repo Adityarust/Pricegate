@@ -27,8 +27,9 @@ enum DataKey {
 #[contracttype]
 #[derive(Clone, Debug, Eq, PartialEq)]
 pub enum Condition {
-    PriceAbove,
-    PriceBelow,
+    PriceAbove(i128),
+    PriceBelow(i128),
+    PriceRange(i128, i128),
 }
 
 #[contracttype]
@@ -45,7 +46,6 @@ pub struct GateConfig {
     pub sender: Address,
     pub recipient: Address,
     pub amount: i128,    // in stroops (1 XLM = 10_000_000)
-    pub threshold: i128, // 7 decimal places, e.g. $0.20 = 2_000_000
     pub condition: Condition,
     pub deadline: u64, // unix timestamp
     pub status: Status,
@@ -95,7 +95,6 @@ impl EscrowContract {
         sender: Address,
         recipient: Address,
         amount: i128,
-        threshold: i128,
         condition: Condition,
         deadline: u64,
     ) -> Result<u64, EscrowError> {
@@ -128,7 +127,6 @@ impl EscrowContract {
             sender: sender.clone(),
             recipient: recipient.clone(),
             amount,
-            threshold,
             condition,
             deadline,
             status: Status::Locked,
@@ -210,16 +208,16 @@ impl EscrowContract {
 
         log!(
             &env,
-            "Gate {}: price={}, threshold={}",
+            "Gate {}: price={}",
             gate_id,
-            current_price,
-            gate.threshold,
+            current_price
         );
 
         // Check condition
         let condition_met = match gate.condition {
-            Condition::PriceAbove => current_price > gate.threshold,
-            Condition::PriceBelow => current_price < gate.threshold,
+            Condition::PriceAbove(threshold) => current_price > threshold,
+            Condition::PriceBelow(threshold) => current_price < threshold,
+            Condition::PriceRange(min, max) => current_price >= min && current_price <= max,
         };
 
         if condition_met {

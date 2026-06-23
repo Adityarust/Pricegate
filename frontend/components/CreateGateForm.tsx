@@ -25,13 +25,15 @@ import { callContract } from "@/lib/stellar";
 import { cn } from "@/lib/utils";
 import Link from "next/link";
 
-type GateCondition = "PriceAbove" | "PriceBelow";
+type GateCondition = "PriceAbove" | "PriceBelow" | "PriceRange";
 
 export default function CreateGateForm() {
   const { address, connected, loading: walletLoading, error: walletError, connect } = useWallet();
   const [recipient, setRecipient] = useState("");
   const [amount, setAmount] = useState("");
   const [threshold, setThreshold] = useState("");
+  const [rangeMin, setRangeMin] = useState("");
+  const [rangeMax, setRangeMax] = useState("");
   const [condition, setCondition] = useState<GateCondition>("PriceAbove");
   const [deadlineHours, setDeadlineHours] = useState("24");
   const [customDeadline, setCustomDeadline] = useState("");
@@ -57,11 +59,21 @@ export default function CreateGateForm() {
 
       const parsedAmount = Number(amount);
       const parsedThreshold = Number(threshold);
+      const parsedMin = Number(rangeMin);
+      const parsedMax = Number(rangeMax);
       if (!Number.isFinite(parsedAmount) || parsedAmount <= 0) throw new Error("Lock amount must be positive.");
-      if (!Number.isFinite(parsedThreshold) || parsedThreshold <= 0) throw new Error("Price target must be positive.");
+      if (condition === "PriceRange") {
+        if (!Number.isFinite(parsedMin) || parsedMin <= 0) throw new Error("Minimum price must be positive.");
+        if (!Number.isFinite(parsedMax) || parsedMax <= 0) throw new Error("Maximum price must be positive.");
+        if (parsedMin >= parsedMax) throw new Error("Minimum price must be lower than maximum price.");
+      } else if (!Number.isFinite(parsedThreshold) || parsedThreshold <= 0) {
+        throw new Error("Price target must be positive.");
+      }
 
       const amountStroops = BigInt(Math.round(parsedAmount * 10_000_000));
       const threshold7Dec = BigInt(Math.round(parsedThreshold * 10_000_000));
+      const rangeMin7Dec = BigInt(Math.round(parsedMin * 10_000_000));
+      const rangeMax7Dec = BigInt(Math.round(parsedMax * 10_000_000));
 
       let deadlineUnix: bigint;
       if (customDeadline) {
@@ -80,8 +92,16 @@ export default function CreateGateForm() {
         StellarSdk.nativeToScVal(address, { type: "address" }),
         StellarSdk.nativeToScVal(recipient, { type: "address" }),
         StellarSdk.nativeToScVal(amountStroops, { type: "i128" }),
-        StellarSdk.nativeToScVal(threshold7Dec, { type: "i128" }),
-        StellarSdk.xdr.ScVal.scvVec([StellarSdk.xdr.ScVal.scvSymbol(condition)]),
+        condition === "PriceRange"
+          ? StellarSdk.xdr.ScVal.scvVec([
+              StellarSdk.xdr.ScVal.scvSymbol(condition),
+              StellarSdk.nativeToScVal(rangeMin7Dec, { type: "i128" }),
+              StellarSdk.nativeToScVal(rangeMax7Dec, { type: "i128" }),
+            ])
+          : StellarSdk.xdr.ScVal.scvVec([
+              StellarSdk.xdr.ScVal.scvSymbol(condition),
+              StellarSdk.nativeToScVal(threshold7Dec, { type: "i128" }),
+            ]),
         StellarSdk.nativeToScVal(deadlineUnix, { type: "u64" }),
       ];
 
@@ -95,6 +115,8 @@ export default function CreateGateForm() {
       setAmount("");
       setRecipient("");
       setThreshold("");
+      setRangeMin("");
+      setRangeMax("");
     } catch (caught) {
       setError(caught instanceof Error ? caught.message : "Escrow creation failed.");
     } finally {
@@ -160,6 +182,7 @@ export default function CreateGateForm() {
                     <SelectGroup>
                       <SelectItem value="PriceAbove">Price goes above</SelectItem>
                       <SelectItem value="PriceBelow">Price goes below</SelectItem>
+                      <SelectItem value="PriceRange">Price stays in range</SelectItem>
                     </SelectGroup>
                   </SelectContent>
                 </Select>
@@ -167,10 +190,44 @@ export default function CreateGateForm() {
             </div>
 
             <div className="grid gap-5 sm:grid-cols-2">
-              <Field data-disabled={loading || undefined}>
-                <FieldLabel htmlFor="threshold">Price target (USD)</FieldLabel>
-                <Input id="threshold" type="number" step="0.0000001" min="0.0000001" required disabled={loading} value={threshold} onChange={(event) => setThreshold(event.target.value)} placeholder="0.30" />
-              </Field>
+              {condition === "PriceRange" ? (
+                <>
+                  <Field data-disabled={loading || undefined}>
+                    <FieldLabel htmlFor="range-min">Min price (USD)</FieldLabel>
+                    <Input
+                      id="range-min"
+                      type="number"
+                      step="0.0000001"
+                      min="0.0000001"
+                      required
+                      disabled={loading}
+                      value={rangeMin}
+                      onChange={(event) => setRangeMin(event.target.value)}
+                      placeholder="0.20"
+                    />
+                  </Field>
+
+                  <Field data-disabled={loading || undefined}>
+                    <FieldLabel htmlFor="range-max">Max price (USD)</FieldLabel>
+                    <Input
+                      id="range-max"
+                      type="number"
+                      step="0.0000001"
+                      min="0.0000001"
+                      required
+                      disabled={loading}
+                      value={rangeMax}
+                      onChange={(event) => setRangeMax(event.target.value)}
+                      placeholder="0.35"
+                    />
+                  </Field>
+                </>
+              ) : (
+                <Field data-disabled={loading || undefined}>
+                  <FieldLabel htmlFor="threshold">Price target (USD)</FieldLabel>
+                  <Input id="threshold" type="number" step="0.0000001" min="0.0000001" required disabled={loading} value={threshold} onChange={(event) => setThreshold(event.target.value)} placeholder="0.30" />
+                </Field>
+              )}
 
               <Field data-disabled={loading || undefined}>
                 <FieldLabel htmlFor="recipient">Recipient address</FieldLabel>

@@ -20,7 +20,10 @@ export const XLM_SAC_ADDRESS =
   "CDLZFC3SYJYDZT7K67VZ75HPJVIEUVNIXF47ZG2FB2RMQQVU2HHGCYSC";
 
 // Gate condition types matching the contract enum
-export type Condition = "PriceAbove" | "PriceBelow";
+export type Condition =
+  | { kind: "PriceAbove"; threshold: bigint }
+  | { kind: "PriceBelow"; threshold: bigint }
+  | { kind: "PriceRange"; min: bigint; max: bigint };
 
 export type Status = "Locked" | "Released" | "Refunded";
 
@@ -28,7 +31,6 @@ export interface GateConfig {
   sender: string;
   recipient: string;
   amount: bigint;
-  threshold: bigint;
   condition: Condition;
   deadline: number;
   status: Status;

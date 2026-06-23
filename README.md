@@ -31,11 +31,13 @@ frontend/    Next.js frontend
 
 ## Screenshot Checklist
 
-Capture these before final submission:
 
-- Mobile UI at 375px width in Chrome DevTools
-- GitHub Actions pipeline showing the test workflow passing
-- `cargo test` output with 3+ passing tests
+
+- ![Mobile ui](image-1.png)
+![Mobile ui](image-2.png)
+![Mobile ui](image-3.png)
+- ![CI/CD](image.png)
+![Cargo test](image-4.png)
 
 ## Local Setup
 

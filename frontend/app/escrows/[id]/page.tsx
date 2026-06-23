@@ -12,7 +12,7 @@ import { Skeleton } from "@/components/ui/skeleton";
 import { Spinner } from "@/components/ui/spinner";
 import { useWallet } from "@/components/WalletConnect";
 import { escrowExplorerUrl } from "@/lib/explorer";
-import { fetchGateById, type GateRecord } from "@/lib/gates";
+import { describeGateCondition, fetchGateById, type GateRecord } from "@/lib/gates";
 import { cn } from "@/lib/utils";
 import { ExternalLinkIcon } from "lucide-react";
 
@@ -164,11 +164,7 @@ export default function EscrowDetailPage() {
         <CardContent className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
           <div>
             <p className="text-sm text-muted-foreground">Condition</p>
-            <p className="mt-1 font-medium">{escrow.condition}</p>
-          </div>
-          <div>
-            <p className="text-sm text-muted-foreground">Threshold</p>
-            <p className="mt-1 font-medium">${escrow.thresholdUsd.toFixed(4)}</p>
+            <p className="mt-1 font-medium">{describeGateCondition(escrow.condition)}</p>
           </div>
           <div>
             <p className="text-sm text-muted-foreground">Amount</p>
