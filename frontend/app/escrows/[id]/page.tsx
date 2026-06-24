@@ -64,7 +64,7 @@ export default function EscrowDetailPage() {
 
   if (invalidEscrowId) {
     return (
-      <section className="mx-auto max-w-4xl px-5 py-20 lg:px-8">
+      <section className="mx-auto max-w-4xl px-4 py-14 sm:px-5 lg:px-8 lg:py-20">
         <Alert variant="destructive">
           <AlertTitle>Invalid escrow id</AlertTitle>
           <AlertDescription className="flex flex-col gap-4">
@@ -80,7 +80,7 @@ export default function EscrowDetailPage() {
 
   if (!connected) {
     return (
-      <section className="mx-auto max-w-4xl px-5 py-20 lg:px-8">
+      <section className="mx-auto max-w-4xl px-4 py-14 sm:px-5 lg:px-8 lg:py-20">
         <Card>
           <CardHeader>
             <CardTitle>Connect wallet</CardTitle>
@@ -101,7 +101,7 @@ export default function EscrowDetailPage() {
 
   if (loading) {
     return (
-      <section className="mx-auto max-w-4xl px-5 py-20 lg:px-8">
+      <section className="mx-auto max-w-4xl px-4 py-14 sm:px-5 lg:px-8 lg:py-20">
         <Card>
           <CardHeader>
             <Skeleton className="h-10 w-48" />
@@ -119,7 +119,7 @@ export default function EscrowDetailPage() {
 
   if (error || !escrow) {
     return (
-      <section className="mx-auto max-w-4xl px-5 py-20 lg:px-8">
+      <section className="mx-auto max-w-4xl px-4 py-14 sm:px-5 lg:px-8 lg:py-20">
         <Alert variant="destructive">
           <AlertTitle>Could not load escrow</AlertTitle>
           <AlertDescription className="flex flex-col gap-4">
@@ -190,7 +190,7 @@ export default function EscrowDetailPage() {
               </AlertDescription>
             </Alert>
           </div>
-          <div className="sm:col-span-4 flex flex-wrap gap-3">
+          <div className="sm:col-span-4 flex flex-col gap-3 sm:flex-row sm:flex-wrap">
             <Link href="/escrows" className={cn(buttonVariants({ variant: "outline" }), "w-full sm:w-fit")}>
               Back to my escrows
             </Link>

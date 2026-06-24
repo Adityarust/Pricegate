@@ -46,17 +46,17 @@ export default function PremiumNav() {
           : "border-transparent bg-background/75 backdrop-blur-md"
       )}
     >
-      <nav className="mx-auto flex h-18 max-w-7xl items-center justify-between px-5 lg:px-8" aria-label="Primary navigation">
+      <nav className="mx-auto flex h-16 max-w-7xl items-center justify-between gap-3 px-4 sm:px-5 lg:px-8" aria-label="Primary navigation">
         <motion.a
           href="/"
           whileHover={{ scale: 1.03 }}
           whileTap={{ scale: 0.98 }}
-          className="flex items-center gap-2.5"
+          className="flex min-w-0 items-center gap-2.5"
         >
-          <span className="flex size-9 items-center justify-center rounded-xl bg-primary text-primary-foreground">
+          <span className="flex size-8 shrink-0 items-center justify-center rounded-xl bg-primary text-primary-foreground sm:size-9">
             <LockKeyholeIcon className="size-4" aria-hidden="true" />
           </span>
-          <span className="font-heading text-xl font-semibold tracking-tight">PriceGate</span>
+          <span className="font-heading text-lg font-semibold tracking-tight sm:text-xl">PriceGate</span>
         </motion.a>
 
         <div className="hidden items-center gap-8 md:flex">
@@ -76,12 +76,12 @@ export default function PremiumNav() {
             <SheetTrigger render={<Button variant="outline" size="icon" aria-label="Open navigation" />}>
               <MenuIcon />
             </SheetTrigger>
-            <SheetContent side="top">
+            <SheetContent side="top" className="px-4 pb-6 pt-8 sm:px-6">
               <SheetHeader>
                 <SheetTitle>PriceGate</SheetTitle>
                 <SheetDescription>Conditional escrow on Stellar.</SheetDescription>
               </SheetHeader>
-              <div className="flex flex-col gap-2 px-4 pb-4">
+              <div className="flex flex-col gap-2 pt-4">
                 {links.map((link) => (
                   <SheetClose
                     key={link.href}

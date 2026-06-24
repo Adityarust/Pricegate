@@ -132,7 +132,7 @@ export default function WalletConnect() {
 
   if (loading) {
     return (
-      <Button variant="outline" disabled>
+      <Button variant="outline" disabled className="w-full sm:w-auto">
         <Spinner data-icon="inline-start" />
         Connecting
       </Button>
@@ -141,12 +141,12 @@ export default function WalletConnect() {
 
   if (connected && address) {
     return (
-      <div className="flex flex-wrap items-center gap-2">
-        <Badge variant="secondary">
+      <div className="flex w-full flex-col gap-2 sm:w-auto sm:flex-row sm:flex-wrap sm:items-center">
+        <Badge variant="secondary" className="w-full justify-center sm:w-auto">
           <WalletIcon data-icon="inline-start" />
           {shortenAddress(address)} · {network ?? "Stellar"}
         </Badge>
-        <Button variant="outline" size="sm" onClick={disconnect}>
+        <Button variant="outline" size="sm" onClick={disconnect} className="w-full sm:w-auto">
           <UnplugIcon data-icon="inline-start" />
           Disconnect
         </Button>
@@ -157,13 +157,13 @@ export default function WalletConnect() {
   return (
     <div className="flex w-full flex-col gap-2 sm:w-auto">
       <div className="flex flex-wrap items-center gap-2">
-        <Button onClick={connect}>
-        <PlugIcon data-icon="inline-start" />
-        Connect Wallet
-      </Button>
+        <Button onClick={connect} className="w-full sm:w-auto">
+          <PlugIcon data-icon="inline-start" />
+          Connect Wallet
+        </Button>
       </div>
       {error && (
-        <Alert variant="destructive" className="w-full max-w-md">
+        <Alert variant="destructive" className="w-full max-w-full sm:max-w-md">
           <AlertTitle>Wallet connection failed</AlertTitle>
           <AlertDescription className="break-words">{error}</AlertDescription>
         </Alert>

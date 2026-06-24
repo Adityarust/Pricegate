@@ -75,7 +75,7 @@ export default function Home() {
             </Badge>
           </motion.div>
 
-          <h1 className="flex flex-col text-4xl leading-[0.98] font-semibold tracking-tight sm:text-5xl lg:text-6xl">
+          <h1 className="flex flex-col text-3xl leading-[0.98] font-semibold tracking-tight sm:text-5xl lg:text-6xl">
             <motion.span variants={fadeUp} transition={{ duration: 0.8 }}>Lock funds.</motion.span>
             <motion.span
               initial={{ opacity: 0, x: -40 }}
@@ -88,7 +88,7 @@ export default function Home() {
             <motion.span variants={fadeUp} transition={{ duration: 0.8 }}>Settle with certainty.</motion.span>
           </h1>
 
-          <motion.p variants={fadeUp} transition={{ duration: 0.8 }} className="max-w-2xl text-sm leading-7 text-muted-foreground sm:text-lg">
+          <motion.p variants={fadeUp} transition={{ duration: 0.8 }} className="max-w-2xl text-sm leading-6 text-muted-foreground sm:text-lg sm:leading-7">
             PriceGate turns a market condition into an enforceable Stellar escrow. No custodian, no manual payout, and no ambiguity.
           </motion.p>
 

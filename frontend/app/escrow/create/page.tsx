@@ -20,11 +20,11 @@ export default function CreateEscrowPage() {
             <ShieldCheckIcon data-icon="inline-start" />
             Non-custodial by design
           </Badge>
-          <h1 className="text-4xl leading-tight font-semibold tracking-tight sm:text-6xl">Turn a price target into a payout rule.</h1>
-          <p className="max-w-lg text-base leading-8 text-muted-foreground sm:text-lg">
+          <h1 className="text-3xl leading-tight font-semibold tracking-tight sm:text-6xl">Turn a price target into a payout rule.</h1>
+          <p className="max-w-lg text-sm leading-7 text-muted-foreground sm:text-lg">
             Funds move only according to the condition you sign. The escrow contract holds XLM until settlement or expiry.
           </p>
-          <dl className="grid grid-cols-1 gap-5 border-t pt-6 sm:grid-cols-2">
+          <dl className="grid grid-cols-1 gap-5 border-t pt-6 text-sm sm:grid-cols-2 sm:text-base">
             <div>
               <dt className="text-sm text-muted-foreground">Network</dt>
               <dd className="mt-1 font-medium">Stellar Testnet</dd>
@@ -44,7 +44,7 @@ export default function CreateEscrowPage() {
                   </Alert>
                 ) : (
                   <>
-                    <Badge variant="outline">{price === null ? "Unavailable" : `$${price.toFixed(4)}`}</Badge>
+                <Badge variant="outline" className="max-w-full truncate">{price === null ? "Unavailable" : `$${price.toFixed(4)}`}</Badge>
                     {refreshing && <span className="text-xs text-muted-foreground">Updating every 5s</span>}
                   </>
                 )}
